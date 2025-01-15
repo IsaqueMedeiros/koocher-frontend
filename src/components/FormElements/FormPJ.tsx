@@ -1,28 +1,15 @@
 "use client";
 
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState, useRef, useEffect } from "react";
-import { Metadata } from "next";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import Link from "next/link";
-import InputMask from "react-input-mask";
-import { Dialog } from "@headlessui/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
-
-// export const metadata: Metadata = {
-//   title: "Next.js Form Layout | TailAdmin - Next.js Dashboard Template",
-//   description:
-//     "This is Next.js Form Layout page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
-// };
 
 const FormPJ = () => {
   const [showModal, setShowModal] = useState(false); // Controla o modal de Quadro Societário
   const [activeTab, setActiveTab] = useState(0); // Controla a aba ativa
   const [cnpjList, setCnpjList] = useState<string[]>([]); // Lista de CNPJs cadastrados
   const [showCnpjList, setShowCnpjList] = useState(false);
-
-  // Referência da lista de CNPJs
   const cnpjListRef = useRef<HTMLUListElement | null>(null);
+
 
   interface QuadroSocietario {
     nome: string;
@@ -103,8 +90,8 @@ const FormPJ = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    if (name in formDataState.quadroSocietario) {
+    
+    if (['nome', 'registroProfissional', 'email', 'telefone', 'cpf'].includes(name)) {
       setFormDataState((prevState) => ({
         ...prevState,
         quadroSocietario: {
@@ -119,6 +106,8 @@ const FormPJ = () => {
       }));
     }
   };
+  
+  
 
   const fetchAddress = async (cep: string) => {
     const cleanCep = cep.replace(/\D/g, ""); // Remove qualquer caractere não numérico
@@ -480,7 +469,7 @@ const FormPJ = () => {
               </label>
               <input
                 name={field.name}
-                value={(FormData as any)[field.name]}
+                value={(formDataState as any)[field.name] || ""}
                 onChange={handleChange}
                 placeholder={field.placeholder}
                 className="w-full rounded-lg border-[1.5px] border-gray-300 px-4 py-2"
