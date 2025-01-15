@@ -9,9 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.2.0",
+    "@material-tailwind/react": "^2.1.10",
     "@types/react-input-mask": "^3.0.6",
     "apexcharts": "^3.45.2",
     "flatpickr": "^4.6.13",
+    "flowbite": "^2.5.2",
     "jsvectormap": "^1.6.0",
     "next": "^14.2.4",
     "react": "^18",

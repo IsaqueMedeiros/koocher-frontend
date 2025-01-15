@@ -2,215 +2,85 @@
 
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState } from "react";
-import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import Link from "next/link";
-import InputMask from 'react-input-mask';
-
-
-
-// export const metadata: Metadata = {
-//   title: "Next.js Form Layout | TailAdmin - Next.js Dashboard Template",
-//   description:
-//     "This is Next.js Form Layout page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
-// };
-
+import FormPJ from "@/components/FormElements/FormPJ";
+import FormTomador from "@/components/FormElements/FormTomador";
+import FormCodServico from "@/components/FormElements/FormCodServico";
 
 const CadastroPrestador = () => {
+  const [activeForm, setActiveForm] = useState<"prestador" | "tomador" | "codigo" | null>("prestador");
 
-
-        const [formData, setFormData] = useState<FormData>({
-
-        cep: '',
-        rua: '',
-        numero: '',
-        complemento: '',
-        bairro: '',
-        cidade: '',
-        uf: '',
-        idCadastro: '',
-        });
-      
-        const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-          const { name, value } = e.target;
-          setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-          }));
-        };
-      
-        const handleSubmit = async (e: React.FormEvent) => {
-          e.preventDefault();
-      
-          try {
-            const response = await fetch('https://be26-187-111-23-250.ngrok-free.app/api/cadastroprestador', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(formData),
-            });
-      
-            if (response.ok) {
-              const result = await response.json();
-              console.log('Dados enviados com sucesso:', result);
-              // Lógica após o envio bem-sucedido (ex. limpar formulário ou mostrar mensagem de sucesso)
-            } else {
-              console.error('Erro ao enviar os dados:', response.statusText);
-              // Lógica em caso de erro
-            }
-          } catch (error) {
-            console.error('Erro ao enviar os dados:', error);
-          }
-        };
-
-    interface FormData {
-        cep: string;
-        rua: string;
-        numero: string;
-        complemento: string;
-        bairro: string;
-        cidade: string;
-        uf: string;
-        idCadastro: string;
-      }
-    
+  const handlePanelChange = (panel: "prestador" | "tomador" | "codigo") => {
+    setActiveForm((prev) => (prev === panel ? null : panel));
+  };
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="CadastroPrestador" />
+      <Breadcrumb pageName="Cadastros" />
 
-      <div className="grid grid-cols-1 gap-9 sm:grid-cols-1">
-        <div className="flex flex-col gap-9">
-          {/* <!-- Contact Form --> */}
-          <div className="rounded-md border border-stroke shadow-default dark:border-strokedark dark:bg-boxdark w-[100%]">
+      <div className="grid w-full grid-cols-1 gap-9 sm:grid-cols-1">
+        <div className="flex-cols-2 flex w-full gap-9">
+          {/* Form Section */}
+          <div className="h-[20rem] w-[25%] rounded-md border border-stroke shadow-2xl dark:border-strokedark dark:bg-boxdark">
             <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-              <h3 className="font-medium text-black dark:text-white">
-                Cadastro Prestador
-              </h3>
+              <h1 className="font-medium text-black dark:text-white">
+                Lista de Cadastros
+              </h1>
             </div>
-            <form  onSubmit={handleSubmit}>
-              <div className="p-6.5">
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                  <div className="w-full xl:w-1/2">
-                    <label className="mb-3 text-sm font-medium text-black dark:text-white">
-                      CEP
-                    </label>
-                    <input
-                    value={formData.cep}
-                    onChange={handleChange}
-                    name="cep"
-                    required
-                      placeholder="Insira seu CEP"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
-                  </div>
 
-                  <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                      Rua
-                    </label>
-                    <input
-                    value={formData.rua}
-                    onChange={handleChange}
-                    required
-                      name="rua"
-                      placeholder="Insira sua rua"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-4.5">
-                  <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                    Número <span className="text-meta-1">*</span>
-                  </label>
-                  <input
-                  value={formData.numero}
-                  onChange={handleChange}
-                  required
-                    name="numero"
-                    placeholder="Número da rua"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                </div>
-
-                <div className="mb-4.5">
-                  <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                    Complemento
-                  </label>
-                  <input
-                  value={formData.complemento}
-                  onChange={handleChange}
-                  required
-                    name="complemento"
-                    placeholder="Complemento"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                </div>
-
-                <div className="mb-4.5">
-                  <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                    Cidade
-                  </label>
-                  <input
-                  value={formData.cidade}
-                  onChange={handleChange}
-                  required
-                    name="cidade"
-                    placeholder="Cidade"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                </div>
-
-                <div className="mb-4.5">
-                  <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                    Bairro
-                  </label>
-                  <input
-                  value={formData.bairro}
-                  onChange={handleChange}
-                  required
-                    name="bairro"
-                    placeholder="Bairro"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                </div>
-
-                <div className="mb-4.5">
-                  <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                    UF
-                  </label>
-                  
-                  <input
-                  value={formData.uf}
-                  onChange={handleChange}
-                  required
-                    name="uf"
-                    placeholder="UF"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                </div>
-
-                <div className="mb-4.5">
-                  <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                    Id de Cadstro
-                  </label>
-                  <input
-                  value={formData.idCadastro}
-                  onChange={handleChange}
-                  required
-                    name="idCadastro"
-                    placeholder="Id de Cadstro"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                </div>
-
-                <button className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
-                  Cadastrar Prestador
+            <div className="mt-[2.5rem] flex w-full flex-col items-center">
+              {/* Botão para abrir painel de Prestador */}
+              <div className="flex w-min flex-row items-center justify-center p-4 ml-8">
+                <button
+                  onClick={() => handlePanelChange("prestador")}
+                  className={`flex h-[2rem] w-[18rem] flex-row items-center justify-start border-l-2 ${
+                    activeForm === "prestador" ? "border-cyan-600" : "border-gray-300"
+                  }`}
+                >
+                  <p className="text-md ml-[5%] text-black dark:text-white">Cadastrar Prestador</p>
                 </button>
               </div>
-            </form>
+
+              {/* Botão para abrir painel de Tomador */}
+              <div className="flex w-min flex-row items-center justify-center p-4 ml-8">
+                <button
+                  onClick={() => handlePanelChange("tomador")}
+                  className={`flex h-[2rem] w-[18rem] flex-row items-center justify-start border-l-2 ${
+                    activeForm === "tomador" ? "border-cyan-600" : "border-gray-300"
+                  }`}
+                >
+                  <p className="text-md ml-[5%] text-black dark:text-white">Cadastrar Tomador</p>
+                </button>
+              </div>
+
+              {/* Botão para abrir painel de Codigo */}
+              <div className="flex w-min flex-row items-center justify-center p-4 ml-8">
+                <button
+                  onClick={() => handlePanelChange("codigo")}
+                  className={`flex h-[2rem] w-[18rem] flex-row items-center justify-start border-l-2 ${
+                    activeForm === "codigo" ? "border-cyan-600" : "border-gray-300"
+                  }`}
+                >
+                  <p className="text-md ml-[5%] text-black dark:text-white">Código de Serviço</p>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Painéis Laterais */}
+          <div className="relative flex-1 rounded-md border border-stroke shadow-2xl dark:border-strokedark dark:bg-boxdark">
+            <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
+              <h1 className="font-medium text-black dark:text-white">Formulário</h1>
+            </div>
+
+            <div className="p-6">
+              {activeForm === "prestador" && <FormPJ />}
+              {activeForm === "tomador" && <FormTomador />}
+              {activeForm === "codigo" && <FormCodServico />}
+              {!activeForm && (
+                <p className="text-gray-500 dark:text-white">Selecione uma opção para visualizar o formulário.</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

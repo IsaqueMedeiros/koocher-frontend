@@ -32,7 +32,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "src/pages/api/cep/route.tsx"  ],
   "exclude": [
     "node_modules"
   ]
