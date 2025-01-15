@@ -10,7 +10,6 @@ const FormPJ = () => {
   const [showCnpjList, setShowCnpjList] = useState(false);
   const cnpjListRef = useRef<HTMLUListElement | null>(null);
 
-
   interface QuadroSocietario {
     nome: string;
     registroProfissional: string;
@@ -28,7 +27,7 @@ const FormPJ = () => {
     cidade: string;
     bairro: string;
     uf: string;
-    idCadastro: string;
+    IdCadastro: string;
     medicos: string;
     Cnpj: string;
     razaoSocial: string;
@@ -59,7 +58,7 @@ const FormPJ = () => {
     cidade: "",
     bairro: "",
     uf: "",
-    idCadastro: "",
+    IdCadastro: "",
     medicos: "",
     Cnpj: "",
     razaoSocial: "",
@@ -90,8 +89,12 @@ const FormPJ = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
-    if (['nome', 'registroProfissional', 'email', 'telefone', 'cpf'].includes(name)) {
+
+    if (
+      ["nome", "registroProfissional", "email", "telefone", "cpf"].includes(
+        name,
+      )
+    ) {
       setFormDataState((prevState) => ({
         ...prevState,
         quadroSocietario: {
@@ -106,8 +109,6 @@ const FormPJ = () => {
       }));
     }
   };
-  
-  
 
   const fetchAddress = async (cep: string) => {
     const cleanCep = cep.replace(/\D/g, ""); // Remove qualquer caractere não numérico
@@ -145,7 +146,7 @@ const FormPJ = () => {
       };
 
       const response = await fetch(
-        `${process.env.API_URL}/api/cadastroprestador`,
+        `https://3b91-187-111-23-250.ngrok-free.app/api/cadastroprestador`,
         {
           method: "PUT",
           headers: {
@@ -177,47 +178,46 @@ const FormPJ = () => {
     }
   };
 
-  const handleCnpjSelect = (Cnpj: string) => {
-    setFormDataState((prevState) => ({
-      ...prevState,
-      Cnpj,
-    }));
-
-    // Esconder a lista de CNPJs após a seleção
-    setShowCnpjList(false);
-  };
-
- const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-  e.preventDefault(); // Previne a ação padrão de um botão
-
-  try {
-    const cnpj = formDataState.Cnpj;
-
-    const response = await fetch(
-      "https://3b91-187-111-23-250.ngrok-free.app/api/listarprestadores",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ cnpj }),
+  const handleCnpjSelect = (selectedCnpj: string) => {
+    const prestador = cnpjListData.find((p: any) => p.Cnpj === selectedCnpj);
+  
+    if (prestador) {
+      const expectedKeys = ['nome', 'registroProfissional', 'email', 'telefone', 'cpf']; // Ajuste conforme necessário
+  
+      let quadroSocietario = {
+        nome: "",
+        registroProfissional: "",
+        email: "",
+        telefone: "",
+        cpf: "",
+      } as QuadroSocietario;
+  
+      if (prestador.QuadroSocietario) {
+        try {
+          // Verifique se o campo é uma string e faça o parse
+          const parsedQuadroSocietario =
+            typeof prestador.QuadroSocietario === "string"
+              ? JSON.parse(prestador.QuadroSocietario)
+              : prestador.QuadroSocietario;
+  
+          if (Array.isArray(parsedQuadroSocietario) && parsedQuadroSocietario.length > 0) {
+            quadroSocietario = { ...parsedQuadroSocietario[0] };
+          } else if (typeof parsedQuadroSocietario === "object") {
+            quadroSocietario = { ...parsedQuadroSocietario };
+          }
+  
+          // Filtramos apenas as chaves desejadas
+          quadroSocietario = Object.fromEntries(
+            Object.entries(quadroSocietario).filter(([key]) => expectedKeys.includes(key))
+          ) as QuadroSocietario;
+        } catch (error) {
+          console.error("Erro ao processar QuadroSocietario:", error);
+        }
       }
-    );
-
-    if (!response.ok) {
-      throw new Error("Erro ao buscar os dados do prestador");
-    }
-
-    const data = await response.json();
-    const prestadores = data.prestadores || [];
-
-    setCnpjList(prestadores.map((prestador: any) => prestador.Cnpj));
-
-    if (prestadores.length > 0) {
-      const prestador = prestadores[0]; // Assumindo que o primeiro prestador é o correto
+  
       setFormDataState((prevState) => ({
         ...prevState,
-        idCadastro: prestador.IdCadastro || "",
+        IdCadastro: prestador.idCadastro || "",
         Cnpj: prestador.Cnpj || "",
         razaoSocial: prestador.RazaoSocial || "",
         emailEmpresa: prestador.EmailEmpresa || "",
@@ -229,18 +229,54 @@ const FormPJ = () => {
         agencia: prestador.Agencia || "",
         banco: prestador.Banco || "",
         conta: prestador.Conta || "",
-        quadroSocietario: prestador.QuadroSocietario || prevState.quadroSocietario,
+        quadroSocietario: quadroSocietario,
       }));
     }
-
-    setShowCnpjList(true);
-  } catch (error) {
-    console.error("Erro ao buscar dados do prestador:", error);
-  }
-};
-
   
+    setShowCnpjList(false);
+  };
   
+
+  // Certifique-se de que você tem um estado para armazenar os dados completos dos prestadores
+  const [cnpjListData, setCnpjListData] = useState<any[]>([]);
+
+  // E modifique handleSearchClick para armazenar todos os dados dos prestadores
+  const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // Previne a ação padrão de um botão
+
+    try {
+      const cnpj = formDataState.Cnpj;
+
+      const response = await fetch(
+        "https://3b91-187-111-23-250.ngrok-free.app/api/listarprestadores",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ cnpj }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro ao buscar os dados do prestador");
+      }
+
+      const data = await response.json();
+      const prestadores = data.prestadores || [];
+
+      // Armazena todos os dados dos prestadores
+      setCnpjListData(prestadores);
+
+      // Atualiza apenas a lista de CNPJs para mostrar na UI
+      setCnpjList(prestadores.map((prestador: any) => prestador.Cnpj));
+
+      setShowCnpjList(true);
+    } catch (error) {
+      console.error("Erro ao buscar dados do prestador:", error);
+    }
+  };
+
   const sections = [
     {
       title: "Empresa",
@@ -252,7 +288,7 @@ const FormPJ = () => {
         },
         {
           label: "Id de Cadastro",
-          name: "idCadastro",
+          name: "IdCadastro",
           placeholder: "Id de Cadastro",
         },
         // { label: "Médicos", name: "medicos", placeholder: "Médicos" },
@@ -383,7 +419,36 @@ const FormPJ = () => {
               </button>
             </div>
 
-            <div className="h-[40vh] w-full rounded-md border border-black shadow-2xl dark:border-strokedark dark:bg-boxdark"></div>
+            <div className="h-[40vh] w-full rounded-md border border-black shadow-2xl dark:border-strokedark dark:bg-boxdark">
+              {Object.keys(formDataState.quadroSocietario || {}).length > 0 ? (
+                <table className="w-full table-auto">
+                  <thead>
+                    <tr>
+                      {Object.keys(formDataState.quadroSocietario).map(
+                        (key, index) => (
+                          <th key={index} className="border px-4 py-2">
+                            {key}
+                          </th>
+                        ),
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      {Object.values(formDataState.quadroSocietario).map(
+                        (value, index) => (
+                          <td key={index} className="border px-4 py-2">
+                            {value || "N/A"}
+                          </td>
+                        ),
+                      )}
+                    </tr>
+                  </tbody>
+                </table>
+              ) : (
+                <p className="p-4 text-center">Nenhum sócio cadastrado.</p>
+              )}
+            </div>
           </div>
         </div>
       ),
@@ -421,7 +486,7 @@ const FormPJ = () => {
               <div className="relative flex w-full items-center">
                 <input
                   type="text"
-                  name="cnpj"
+                  name="Cnpj"
                   value={formDataState.Cnpj}
                   onChange={handleChange}
                   placeholder="CNPJ da empresa"
