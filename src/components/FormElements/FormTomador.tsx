@@ -77,7 +77,7 @@ const FormTomador = () => {
           if (e) e.preventDefault(); 
       
           try {
-            const response = await fetch(`${process.env.API_URL}/api/tomador`, {
+            const response = await fetch(`https://1a68-187-111-23-250.ngrok-free.app/api/tomador`, {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ const FormTomador = () => {
           
           const handleSelectCNPJ = async (selectedCnpj: string) => {
             try {
-              const response = await fetch(`/api/cnpj/${selectedCnpj}`);
+              const response = await fetch(`https://1a68-187-111-23-250.ngrok-free.app/api/cnpj/${selectedCnpj}`);
               if (!response.ok) {
                 throw new Error("Erro ao buscar dados do CNPJ");
               }

@@ -25,14 +25,16 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "target": "ES2017"
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
-, "src/pages/api/cep/route.tsx"  ],
+    ".next/types/**/*.ts",
+    "src/pages/api/cep/route.tsx"
+, "src/pages/upload.js"  ],
   "exclude": [
     "node_modules"
   ]

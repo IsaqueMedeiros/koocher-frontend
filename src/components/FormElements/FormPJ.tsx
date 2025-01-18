@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
+import { Buffer } from 'buffer';
+// import handler from "@/pages/upload";zz
 
 const FormPJ = () => {
   const [showModal, setShowModal] = useState(false); // Controla o modal de Quadro Societário
@@ -9,6 +11,9 @@ const FormPJ = () => {
   const [cnpjList, setCnpjList] = useState<string[]>([]); // Lista de CNPJs cadastrados
   const [showCnpjList, setShowCnpjList] = useState(false);
   const cnpjListRef = useRef<HTMLUListElement | null>(null);
+  const [file, setFile] = useState<File | null>(null); // State for the file
+  const [fileUrl, setFileUrl] = useState<string>(""); // Sta
+
 
   interface QuadroSocietario {
     nome: string;
@@ -47,7 +52,7 @@ const FormPJ = () => {
     senhaDEISS: string;
     status: string;
     senhaCertificadoDigital: string;
-    quadroSocietario: QuadroSocietario;
+    quadroSocietario: QuadroSocietario[];
   }
 
   const [formDataState, setFormDataState] = useState<FormDataState>({
@@ -78,38 +83,30 @@ const FormPJ = () => {
     senhaDEISS: "",
     status: "",
     senhaCertificadoDigital: "",
-    quadroSocietario: {
-      nome: "",
-      registroProfissional: "",
-      email: "",
-      telefone: "",
-      cpf: "",
-    },
+    quadroSocietario: [],
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    if (
-      ["nome", "registroProfissional", "email", "telefone", "cpf"].includes(
-        name,
-      )
-    ) {
-      setFormDataState((prevState) => ({
-        ...prevState,
-        quadroSocietario: {
-          ...prevState.quadroSocietario,
+  
+    setFormDataState((prevState) => {
+      const newSocios = [...prevState.quadroSocietario];
+  
+      // Atualiza o campo específico no último sócio sem adicionar novos
+      if (newSocios.length > 0) {
+        newSocios[newSocios.length - 1] = {
+          ...newSocios[newSocios.length - 1],
           [name]: value,
-        },
-      }));
-    } else {
-      setFormDataState((prevState) => ({
+        };
+      }
+  
+      return {
         ...prevState,
-        [name]: value,
-      }));
-    }
+        quadroSocietario: newSocios,
+      };
+    });
   };
-
+  
   const fetchAddress = async (cep: string) => {
     const cleanCep = cep.replace(/\D/g, ""); // Remove qualquer caractere não numérico
 
@@ -137,16 +134,34 @@ const FormPJ = () => {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-
+  
+    // Adiciona um novo sócio antes de enviar os dados
+    setFormDataState((prevState) => {
+      const newSocios = [...prevState.quadroSocietario];
+      if (newSocios.length === 0 || newSocios[newSocios.length - 1].nome !== "") {
+        newSocios.push({
+          nome: "",
+          registroProfissional: "",
+          email: "",
+          telefone: "",
+          cpf: "",
+        });
+      }
+      return {
+        ...prevState,
+        quadroSocietario: newSocios,
+      };
+    });
+  
+    // Envia os dados ao backend
     try {
-      // Atualizando o formDataState com quadroSocietario como string JSON
       const updatedFormData = {
-        ...formDataState, // Usando formDataState (não FormData)
+        ...formDataState,
         quadroSocietario: JSON.stringify(formDataState.quadroSocietario),
       };
-
+  
       const response = await fetch(
-        `https://3b91-187-111-23-250.ngrok-free.app/api/cadastroprestador`,
+        `https://f814-187-111-23-250.ngrok-free.app/api/cadastroprestador`,
         {
           method: "PUT",
           headers: {
@@ -155,66 +170,77 @@ const FormPJ = () => {
           body: JSON.stringify(updatedFormData),
         },
       );
-
+  
       if (response.ok) {
         const result = await response.json();
         console.log("Dados enviados com sucesso:", result);
-
-        // Salvar o CNPJ no localStorage, assumindo que ele está em formDataState
+  
         if (formDataState.Cnpj) {
           const cnpjSemBarras = formDataState.Cnpj.replace(/[^\d]/g, "");
           localStorage.setItem("cnpj", cnpjSemBarras);
-
           console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
         }
-
+  
         // Lógica após o envio bem-sucedido (ex. limpar formulário ou mostrar mensagem de sucesso)
       } else {
         console.error("Erro ao enviar os dados:", response.statusText);
-        // Lógica em caso de erro
       }
     } catch (error) {
       console.error("Erro ao enviar os dados:", error);
     }
   };
+  
 
   const handleCnpjSelect = (selectedCnpj: string) => {
     const prestador = cnpjListData.find((p: any) => p.Cnpj === selectedCnpj);
-  
+
     if (prestador) {
-      const expectedKeys = ['nome', 'registroProfissional', 'email', 'telefone', 'cpf']; // Ajuste conforme necessário
-  
-      let quadroSocietario = {
-        nome: "",
-        registroProfissional: "",
-        email: "",
-        telefone: "",
-        cpf: "",
-      } as QuadroSocietario;
-  
+      const expectedKeys = [
+        "nome",
+        "registroProfissional",
+        "email",
+        "telefone",
+        "cpf",
+      ];
+
+      let quadroSocietario: QuadroSocietario[];
+
       if (prestador.QuadroSocietario) {
         try {
-          // Verifique se o campo é uma string e faça o parse
           const parsedQuadroSocietario =
             typeof prestador.QuadroSocietario === "string"
               ? JSON.parse(prestador.QuadroSocietario)
               : prestador.QuadroSocietario;
-  
-          if (Array.isArray(parsedQuadroSocietario) && parsedQuadroSocietario.length > 0) {
-            quadroSocietario = { ...parsedQuadroSocietario[0] };
+
+          // Parte do handleCnpjSelect
+          // Processando quadroSocietario
+          if (Array.isArray(parsedQuadroSocietario)) {
+            quadroSocietario = parsedQuadroSocietario.filter((socio) => {
+              // Verifique se todos os campos necessários têm valores válidos
+              return expectedKeys.every(
+                (key) => socio[key] && socio[key] !== "N/A",
+              );
+            });
           } else if (typeof parsedQuadroSocietario === "object") {
-            quadroSocietario = { ...parsedQuadroSocietario };
+            quadroSocietario = [parsedQuadroSocietario].filter((socio) => {
+              // Verifique se todos os campos necessários têm valores válidos
+              return expectedKeys.every(
+                (key) => socio[key] && socio[key] !== "N/A",
+              );
+            });
+          } else {
+            // Caso nenhum dos casos acima se aplique, inicializamos um array vazio
+            quadroSocietario = [];
           }
-  
-          // Filtramos apenas as chaves desejadas
-          quadroSocietario = Object.fromEntries(
-            Object.entries(quadroSocietario).filter(([key]) => expectedKeys.includes(key))
-          ) as QuadroSocietario;
         } catch (error) {
           console.error("Erro ao processar QuadroSocietario:", error);
+          quadroSocietario = []; // Em caso de erro, inicializamos um array vazio
         }
+      } else {
+        // Se não houver QuadroSocietario, inicializamos com um array vazio
+        quadroSocietario = [];
       }
-  
+
       setFormDataState((prevState) => ({
         ...prevState,
         IdCadastro: prestador.idCadastro || "",
@@ -232,10 +258,9 @@ const FormPJ = () => {
         quadroSocietario: quadroSocietario,
       }));
     }
-  
+
     setShowCnpjList(false);
   };
-  
 
   // Certifique-se de que você tem um estado para armazenar os dados completos dos prestadores
   const [cnpjListData, setCnpjListData] = useState<any[]>([]);
@@ -248,7 +273,7 @@ const FormPJ = () => {
       const cnpj = formDataState.Cnpj;
 
       const response = await fetch(
-        "https://3b91-187-111-23-250.ngrok-free.app/api/listarprestadores",
+        "https://f814-187-111-23-250.ngrok-free.app/api/listarprestadores",
         {
           method: "POST",
           headers: {
@@ -276,6 +301,14 @@ const FormPJ = () => {
       console.error("Erro ao buscar dados do prestador:", error);
     }
   };
+
+  const expectedKeys = [
+    "nome",
+    "registroProfissional",
+    "email",
+    "telefone",
+    "cpf",
+  ];
 
   const sections = [
     {
@@ -348,6 +381,39 @@ const FormPJ = () => {
       title: "Acessos",
       fields: [
         //  { label: "Certificado Digital", name: "certificadoDigital", placeholder: "Certificado Digital" }, ARQUIVO .PFX ?? .P12
+        // {
+        //   label: "Certificado Digital",
+        //   name: "certificadoDigital",
+        //   type: "file",
+        //   onChange: async (e: React.ChangeEvent<HTMLInputElement>) => {
+        //     if (e.target.files && e.target.files[0]) {
+        //       const file = e.target.files[0];
+        //       setFile(file);
+          
+        //       try {
+        //         const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+        //           const reader = new FileReader();
+        //           reader.onload = () => resolve(reader.result as ArrayBuffer);
+        //           reader.onerror = reject;
+        //           reader.readAsArrayBuffer(file);
+        //         });
+          
+        //         const buffer = Buffer.from(arrayBuffer);
+        //         const url = await handler(buffer, file.name, "certificados");
+        //         if (typeof url === 'string') { // Verifica se url é uma string
+        //           setFileUrl(url);
+        //           setFormDataState(prev => ({
+        //             ...prev,
+        //             certificadoDigital: url
+        //           }));
+        //         }
+        //       } catch (error) {
+        //         console.error("Erro ao fazer upload:", error);
+        //         // Handle error here, perhaps show a user-friendly message
+        //       }
+        //     }
+        //   }
+        // },
         {
           label: "Senha Certificado Digital",
           name: "senhaCertificadoDigital",
@@ -419,32 +485,43 @@ const FormPJ = () => {
               </button>
             </div>
 
-            <div className="h-[40vh] w-full rounded-md border border-black shadow-2xl dark:border-strokedark dark:bg-boxdark">
-              {Object.keys(formDataState.quadroSocietario || {}).length > 0 ? (
-                <table className="w-full table-auto">
-                  <thead>
-                    <tr>
-                      {Object.keys(formDataState.quadroSocietario).map(
-                        (key, index) => (
-                          <th key={index} className="border px-4 py-2">
-                            {key}
-                          </th>
-                        ),
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      {Object.values(formDataState.quadroSocietario).map(
-                        (value, index) => (
-                          <td key={index} className="border px-4 py-2">
-                            {value || "N/A"}
-                          </td>
-                        ),
-                      )}
-                    </tr>
-                  </tbody>
-                </table>
+            <div className="h-[40vh] w-full overflow-auto rounded-md border border-black shadow-2xl dark:border-strokedark dark:bg-boxdark">
+              {formDataState.quadroSocietario.length > 0 ? (
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full min-w-[600px] table-auto">
+                    <thead>
+                      <tr>
+                        {Object.keys(formDataState.quadroSocietario[0]).map(
+                          (key, index) => (
+                            <th
+                              key={index}
+                              className="border bg-gray-100 px-4 py-2 text-left"
+                            >
+                              {key}
+                            </th>
+                          ),
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {formDataState.quadroSocietario
+                        .filter((socio) =>
+                          expectedKeys.every(
+                            (key) => socio[key] && socio[key] !== "N/A",
+                          ),
+                        )
+                        .map((socio, rowIndex) => (
+                          <tr key={rowIndex}>
+                            {Object.values(socio).map((value, index) => (
+                              <td key={index} className="border px-4 py-2">
+                                {value || "N/A"}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
                 <p className="p-4 text-center">Nenhum sócio cadastrado.</p>
               )}
@@ -569,34 +646,31 @@ const FormPJ = () => {
           <div className="w-[90%] max-w-lg rounded-lg bg-white p-6 shadow-lg">
             <h2 className="mb-4 text-lg font-bold">Adicionar Sócio</h2>
             <form>
-              {[
-                { label: "Nome", name: "nome", placeholder: "Nome" },
-                {
-                  label: "Registro Profissional",
-                  name: "registroProfissional",
-                  placeholder: "Registro Profissional",
-                },
-                { label: "E-mail", name: "email", placeholder: "E-mail" },
-                {
-                  label: "Telefone",
-                  name: "telefone",
-                  placeholder: "Telefone",
-                },
-                { label: "CPF", name: "cpf", placeholder: "CPF" },
-              ].map((field, index) => (
-                <div key={index} className="mb-4">
-                  <label className="mb-2 block text-sm font-medium text-black">
-                    {field.label}
-                  </label>
-                  <input
-                    name={field.name}
-                    value={formDataState.quadroSocietario[field.name]} // Vincula o valor ao quadroSocietario
-                    placeholder={field.placeholder}
-                    onChange={handleChange} // Atualiza o estado ao digitar
-                    className="w-full rounded-lg border-[1.5px] border-gray-300 px-4 py-2"
-                  />
-                </div>
-              ))}
+            {[
+  { label: "Nome", name: "nome", placeholder: "Nome" },
+  { label: "Registro Profissional", name: "registroProfissional", placeholder: "Registro Profissional" },
+  { label: "E-mail", name: "email", placeholder: "E-mail" },
+  { label: "Telefone", name: "telefone", placeholder: "Telefone" },
+  { label: "CPF", name: "cpf", placeholder: "CPF" },
+].map((field, index) => (
+  <div key={index} className="mb-4">
+    <label className="mb-2 block text-sm font-medium text-black">
+      {field.label}
+    </label>
+    <input
+      name={field.name}
+      value={
+        formDataState.quadroSocietario.length > 0 && formDataState.quadroSocietario[formDataState.quadroSocietario.length - 1]
+          ? formDataState.quadroSocietario[formDataState.quadroSocietario.length - 1][field.name] || ""
+          : ""
+      }
+      placeholder={field.placeholder}
+      onChange={handleChange}
+      className="w-full rounded-lg border-[1.5px] border-gray-300 px-4 py-2"
+    />
+  </div>
+))}
+
               <div className="flex justify-end">
                 <button
                   type="button"
