@@ -49,7 +49,7 @@ const FormCodServico = () => {
           if (e) e.preventDefault(); 
       
           try {
-            const response = await fetch(`https://1a68-187-111-23-250.ngrok-free.app/api/codigoservico`, {
+            const response = await fetch(`https://7d90-187-111-23-250.ngrok-free.app/api/codigoservico`, {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',

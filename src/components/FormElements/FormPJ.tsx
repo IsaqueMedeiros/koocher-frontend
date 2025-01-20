@@ -2,18 +2,73 @@
 
 import { useState, useRef, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
-import { Buffer } from 'buffer';
-// import handler from "@/pages/upload";zz
+import { Buffer } from "buffer";
+// import CodigoServico from "@/pages/api/CodigoServico";
 
 const FormPJ = () => {
   const [showModal, setShowModal] = useState(false); // Controla o modal de Quadro Societário
   const [activeTab, setActiveTab] = useState(0); // Controla a aba ativa
+  //States para funções CNPJ
   const [cnpjList, setCnpjList] = useState<string[]>([]); // Lista de CNPJs cadastrados
   const [showCnpjList, setShowCnpjList] = useState(false);
   const cnpjListRef = useRef<HTMLUListElement | null>(null);
-  const [file, setFile] = useState<File | null>(null); // State for the file
-  const [fileUrl, setFileUrl] = useState<string>(""); // Sta
+  //States para funções codigo de serviço
+  const [servicoList, setServicoList] = useState<CodigoServico[]>([]);
+  const [showServicoList, setShowServicoList] = useState(false);
+  const servicoListRef = useRef<HTMLUListElement | null>(null);
 
+  {
+    /*----> Codigos para lista de serviço  <---- */
+  }
+
+  interface CodigoServico {
+    chaveUnica: string;
+    descricao: string;
+  }
+
+  const handleServicoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormDataState((prevState) => ({ ...prevState, [name]: value }));
+  };
+const handleServicoSearchClick = async () => {
+  // Fetch the data when the search button is clicked
+  try {
+    const response = await fetch(
+      "https://7d90-187-111-23-250.ngrok-free.app/api/listarcodigos",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Erro ao buscar os dados");
+    }
+
+    const result = await response.json();
+    setServicoList(result.CodigosServico); // Update the servicoList state
+    setShowServicoList(true); // Show the list once the data is fetched
+  } catch (error) {
+    console.error("Erro ao carregar os dados", error);
+  }
+};
+
+
+  const handleServicoSelect = (servico: CodigoServico) => {
+    // Handle selecting a service from the list
+    setFormDataState((prevState) => ({
+      ...prevState,
+      codServico: servico.chaveUnica,
+    }));
+  };
+
+  useEffect(() => {
+    console.log("Service list visibility changed:", showServicoList);
+  }, [showServicoList]);
+
+  {
+    /*----> Codigos para lista de serviço (FIM) <---- */
+  }
 
   interface QuadroSocietario {
     nome: string;
@@ -53,6 +108,7 @@ const FormPJ = () => {
     status: string;
     senhaCertificadoDigital: string;
     quadroSocietario: QuadroSocietario[];
+    codServico: string;
   }
 
   const [formDataState, setFormDataState] = useState<FormDataState>({
@@ -84,14 +140,15 @@ const FormPJ = () => {
     status: "",
     senhaCertificadoDigital: "",
     quadroSocietario: [],
+    codServico: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-  
+
     setFormDataState((prevState) => {
       const newSocios = [...prevState.quadroSocietario];
-  
+
       // Atualiza o campo específico no último sócio sem adicionar novos
       if (newSocios.length > 0) {
         newSocios[newSocios.length - 1] = {
@@ -99,14 +156,14 @@ const FormPJ = () => {
           [name]: value,
         };
       }
-  
+
       return {
         ...prevState,
         quadroSocietario: newSocios,
       };
     });
   };
-  
+
   const fetchAddress = async (cep: string) => {
     const cleanCep = cep.replace(/\D/g, ""); // Remove qualquer caractere não numérico
 
@@ -134,11 +191,14 @@ const FormPJ = () => {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-  
+
     // Adiciona um novo sócio antes de enviar os dados
     setFormDataState((prevState) => {
       const newSocios = [...prevState.quadroSocietario];
-      if (newSocios.length === 0 || newSocios[newSocios.length - 1].nome !== "") {
+      if (
+        newSocios.length === 0 ||
+        newSocios[newSocios.length - 1].nome !== ""
+      ) {
         newSocios.push({
           nome: "",
           registroProfissional: "",
@@ -152,14 +212,14 @@ const FormPJ = () => {
         quadroSocietario: newSocios,
       };
     });
-  
+
     // Envia os dados ao backend
     try {
       const updatedFormData = {
         ...formDataState,
         quadroSocietario: JSON.stringify(formDataState.quadroSocietario),
       };
-  
+
       const response = await fetch(
         `https://f814-187-111-23-250.ngrok-free.app/api/cadastroprestador`,
         {
@@ -170,17 +230,17 @@ const FormPJ = () => {
           body: JSON.stringify(updatedFormData),
         },
       );
-  
+
       if (response.ok) {
         const result = await response.json();
         console.log("Dados enviados com sucesso:", result);
-  
+
         if (formDataState.Cnpj) {
           const cnpjSemBarras = formDataState.Cnpj.replace(/[^\d]/g, "");
           localStorage.setItem("cnpj", cnpjSemBarras);
           console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
         }
-  
+
         // Lógica após o envio bem-sucedido (ex. limpar formulário ou mostrar mensagem de sucesso)
       } else {
         console.error("Erro ao enviar os dados:", response.statusText);
@@ -189,7 +249,6 @@ const FormPJ = () => {
       console.error("Erro ao enviar os dados:", error);
     }
   };
-  
 
   const handleCnpjSelect = (selectedCnpj: string) => {
     const prestador = cnpjListData.find((p: any) => p.Cnpj === selectedCnpj);
@@ -389,7 +448,7 @@ const FormPJ = () => {
         //     if (e.target.files && e.target.files[0]) {
         //       const file = e.target.files[0];
         //       setFile(file);
-          
+
         //       try {
         //         const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
         //           const reader = new FileReader();
@@ -397,7 +456,7 @@ const FormPJ = () => {
         //           reader.onerror = reject;
         //           reader.readAsArrayBuffer(file);
         //         });
-          
+
         //         const buffer = Buffer.from(arrayBuffer);
         //         const url = await handler(buffer, file.name, "certificados");
         //         if (typeof url === 'string') { // Verifica se url é uma string
@@ -459,11 +518,6 @@ const FormPJ = () => {
           label: "Inscricao Municipal",
           name: "inscricaoMunicipal",
           placeholder: "Inscricao Municipal",
-        },
-        {
-          label: "Cod. Serviço",
-          name: "codServico",
-          placeholder: "Cod. Serviço",
         },
       ],
     },
@@ -551,7 +605,7 @@ const FormPJ = () => {
       </div>
       <div style={{ minHeight: "400px" }}>
         <form className="grid w-full grid-cols-2 gap-4 sm:grid-cols-2">
-          {/* Campo CNPJ como o primeiro */}
+          {/* Campo CNPJ */}
           {activeTab === 0 && (
             <div className="mb-4 flex flex-col">
               <label
@@ -569,7 +623,6 @@ const FormPJ = () => {
                   placeholder="CNPJ da empresa"
                   className="w-full rounded border p-2"
                 />
-
                 <button
                   type="button"
                   onClick={handleSearchClick}
@@ -596,6 +649,57 @@ const FormPJ = () => {
                   ) : (
                     <li className="px-4 py-2 text-gray-500">
                       Nenhum CNPJ encontrado
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {/* Campo Código Serviço */}
+          {activeTab === 3 && ( // Check if the active tab is "Fiscal" (index 3)
+            <div className="mb-4 flex flex-col">
+              <label
+                htmlFor="codServico"
+                className="mb-2 text-sm font-medium text-gray-700"
+              >
+                Código Serviço
+              </label>
+              <div className="relative flex w-full items-center">
+                <input
+                  type="text"
+                  name="codServico"
+                  value={formDataState.codServico}
+                  onChange={handleServicoChange}
+                  placeholder="Digite o Código do Serviço"
+                  className="w-full rounded border p-2"
+                />
+                <button
+                  type="button"
+                  onClick={handleServicoSearchClick}
+                  className="absolute right-0 mr-[2%] rounded-[1rem] bg-blue-600 px-4 py-1 text-white hover:bg-blue-700 focus:outline-none"
+                >
+                  <MagnifyingGlassIcon className="h-5 w-5" />
+                </button>
+              </div>
+              {showServicoList && (
+                <ul
+                  ref={servicoListRef}
+                  className="absolute z-10 ml-[46%] mt-[-5rem] w-[40%] rounded-md border border-gray-300 bg-white shadow-lg"
+                >
+                  {servicoList.length > 0 ? (
+                    servicoList.map((codServico, index) => (
+                      <li
+                        key={index}
+                        className="cursor-pointer px-4 py-2 hover:bg-gray-100"
+                        onClick={() => handleServicoSelect(codServico)}
+                      >
+                        {codServico.chaveUnica} - {codServico.descricao}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-4 py-2 text-gray-500">
+                      Nenhum Código de Serviço encontrado
                     </li>
                   )}
                 </ul>
@@ -646,30 +750,43 @@ const FormPJ = () => {
           <div className="w-[90%] max-w-lg rounded-lg bg-white p-6 shadow-lg">
             <h2 className="mb-4 text-lg font-bold">Adicionar Sócio</h2>
             <form>
-            {[
-  { label: "Nome", name: "nome", placeholder: "Nome" },
-  { label: "Registro Profissional", name: "registroProfissional", placeholder: "Registro Profissional" },
-  { label: "E-mail", name: "email", placeholder: "E-mail" },
-  { label: "Telefone", name: "telefone", placeholder: "Telefone" },
-  { label: "CPF", name: "cpf", placeholder: "CPF" },
-].map((field, index) => (
-  <div key={index} className="mb-4">
-    <label className="mb-2 block text-sm font-medium text-black">
-      {field.label}
-    </label>
-    <input
-      name={field.name}
-      value={
-        formDataState.quadroSocietario.length > 0 && formDataState.quadroSocietario[formDataState.quadroSocietario.length - 1]
-          ? formDataState.quadroSocietario[formDataState.quadroSocietario.length - 1][field.name] || ""
-          : ""
-      }
-      placeholder={field.placeholder}
-      onChange={handleChange}
-      className="w-full rounded-lg border-[1.5px] border-gray-300 px-4 py-2"
-    />
-  </div>
-))}
+              {[
+                { label: "Nome", name: "nome", placeholder: "Nome" },
+                {
+                  label: "Registro Profissional",
+                  name: "registroProfissional",
+                  placeholder: "Registro Profissional",
+                },
+                { label: "E-mail", name: "email", placeholder: "E-mail" },
+                {
+                  label: "Telefone",
+                  name: "telefone",
+                  placeholder: "Telefone",
+                },
+                { label: "CPF", name: "cpf", placeholder: "CPF" },
+              ].map((field, index) => (
+                <div key={index} className="mb-4">
+                  <label className="mb-2 block text-sm font-medium text-black">
+                    {field.label}
+                  </label>
+                  <input
+                    name={field.name}
+                    value={
+                      formDataState.quadroSocietario.length > 0 &&
+                      formDataState.quadroSocietario[
+                        formDataState.quadroSocietario.length - 1
+                      ]
+                        ? formDataState.quadroSocietario[
+                            formDataState.quadroSocietario.length - 1
+                          ][field.name] || ""
+                        : ""
+                    }
+                    placeholder={field.placeholder}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-[1.5px] border-gray-300 px-4 py-2"
+                  />
+                </div>
+              ))}
 
               <div className="flex justify-end">
                 <button

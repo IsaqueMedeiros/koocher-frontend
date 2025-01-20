@@ -48,7 +48,7 @@ const TablePrestador = () => {
   const fetchData = async () => {
     try {
       const response = await fetch(
-        `https://3b91-187-111-23-250.ngrok-free.app/api/listarprestadores`,
+        `https://f814-187-111-23-250.ngrok-free.app/api/listarprestadores`,
         {
           method: "POST",
           headers: {
