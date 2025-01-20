@@ -16,6 +16,7 @@ const FormPJ = () => {
   const [servicoList, setServicoList] = useState<CodigoServico[]>([]);
   const [showServicoList, setShowServicoList] = useState(false);
   const servicoListRef = useRef<HTMLUListElement | null>(null);
+  const [codigoServico, setCodigoServico] = useState<string>('');
 
   {
     /*----> Codigos para lista de serviço  <---- */
@@ -53,14 +54,14 @@ const handleServicoSearchClick = async () => {
   }
 };
 
+const handleServicoSelect = (service: string | CodigoServico) => {
+  const code = typeof service === 'string' ? service : `${service.chaveUnica} - ${service.descricao}`;
+  setFormDataState((prevState) => ({
+    ...prevState,
+    codServico: code,
+  }));
+};
 
-  const handleServicoSelect = (servico: CodigoServico) => {
-    // Handle selecting a service from the list
-    setFormDataState((prevState) => ({
-      ...prevState,
-      codServico: servico.chaveUnica,
-    }));
-  };
 
   useEffect(() => {
     console.log("Service list visibility changed:", showServicoList);
@@ -210,6 +211,7 @@ const handleServicoSearchClick = async () => {
       return {
         ...prevState,
         quadroSocietario: newSocios,
+        codServico: codigoServico,
       };
     });
 
@@ -221,7 +223,7 @@ const handleServicoSearchClick = async () => {
       };
 
       const response = await fetch(
-        `https://f814-187-111-23-250.ngrok-free.app/api/cadastroprestador`,
+        `https://7d90-187-111-23-250.ngrok-free.app/api/cadastroprestador`,
         {
           method: "PUT",
           headers: {
@@ -332,7 +334,7 @@ const handleServicoSearchClick = async () => {
       const cnpj = formDataState.Cnpj;
 
       const response = await fetch(
-        "https://f814-187-111-23-250.ngrok-free.app/api/listarprestadores",
+        "https://7d90-187-111-23-250.ngrok-free.app/api/listarprestadores",
         {
           method: "POST",
           headers: {
