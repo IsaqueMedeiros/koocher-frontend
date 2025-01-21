@@ -35,7 +35,7 @@ const handleServicoSearchClick = async () => {
   // Fetch the data when the search button is clicked
   try {
     const response = await fetch(
-      "https://7d90-187-111-23-250.ngrok-free.app/api/listarcodigos",
+      "https://b426-187-111-23-250.ngrok-free.app/api/listarcodigos",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -143,27 +143,29 @@ const handleServicoSelect = (service: string | CodigoServico) => {
     quadroSocietario: [],
     codServico: "",
   });
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
+  
     setFormDataState((prevState) => {
-      const newSocios = [...prevState.quadroSocietario];
-
-      // Atualiza o campo específico no último sócio sem adicionar novos
-      if (newSocios.length > 0) {
-        newSocios[newSocios.length - 1] = {
-          ...newSocios[newSocios.length - 1],
-          [name]: value,
-        };
+      // Se o campo for parte de 'quadroSocietario', atualiza o último sócio
+      if (prevState.quadroSocietario.some((socio) => socio.hasOwnProperty(name))) {
+        const newSocios = [...prevState.quadroSocietario];
+  
+        if (newSocios.length > 0) {
+          newSocios[newSocios.length - 1] = {
+            ...newSocios[newSocios.length - 1],
+            [name]: value,
+          };
+        }
+  
+        return { ...prevState, quadroSocietario: newSocios };
       }
-
-      return {
-        ...prevState,
-        quadroSocietario: newSocios,
-      };
+  
+      // Se o campo for um campo normal, apenas atualiza o estado normalmente
+      return { ...prevState, [name]: value };
     });
   };
+  
 
   const fetchAddress = async (cep: string) => {
     const cleanCep = cep.replace(/\D/g, ""); // Remove qualquer caractere não numérico
@@ -223,7 +225,7 @@ const handleServicoSelect = (service: string | CodigoServico) => {
       };
 
       const response = await fetch(
-        `https://7d90-187-111-23-250.ngrok-free.app/api/cadastroprestador`,
+        `https://b426-187-111-23-250.ngrok-free.app/api/cadastroprestador`,
         {
           method: "PUT",
           headers: {
@@ -334,7 +336,7 @@ const handleServicoSelect = (service: string | CodigoServico) => {
       const cnpj = formDataState.Cnpj;
 
       const response = await fetch(
-        "https://7d90-187-111-23-250.ngrok-free.app/api/listarprestadores",
+        "https://b426-187-111-23-250.ngrok-free.app/api/listarprestadores",
         {
           method: "POST",
           headers: {
