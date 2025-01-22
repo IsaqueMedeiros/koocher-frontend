@@ -35,7 +35,8 @@ const handleServicoSearchClick = async () => {
   // Fetch the data when the search button is clicked
   try {
     const response = await fetch(
-      "https://b426-187-111-23-250.ngrok-free.app/api/listarcodigos",
+      `${process.env.API_URL}/api/listarcodigos`,
+
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -225,7 +226,7 @@ const handleServicoSelect = (service: string | CodigoServico) => {
       };
 
       const response = await fetch(
-        `https://b426-187-111-23-250.ngrok-free.app/api/cadastroprestador`,
+        `${process.env.API_URL}/api/cadastroprestador`,
         {
           method: "PUT",
           headers: {
@@ -336,7 +337,8 @@ const handleServicoSelect = (service: string | CodigoServico) => {
       const cnpj = formDataState.Cnpj;
 
       const response = await fetch(
-        "https://b426-187-111-23-250.ngrok-free.app/api/listarprestadores",
+        `${process.env.API_URL}/api/listarprestadores`,
+
         {
           method: "POST",
           headers: {

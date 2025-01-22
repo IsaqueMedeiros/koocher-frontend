@@ -35,7 +35,7 @@ const FormNotas = () => {
     // Fetch the data when the search button is clicked
     try {
       const response = await fetch(
-        "https://7d90-187-111-23-250.ngrok-free.app/api/listarcodigos",
+        `${process.env.API_URL}/api/listarcodigos`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -76,143 +76,124 @@ const FormNotas = () => {
 
 
   interface FormDataState {
-    cep: string;
-    rua: string;
-    numero: string;
-    complemento: string;
-    cidade: string;
-    bairro: string;
-    uf: string;
-    IdCadastro: string;
-    medicos: string;
-    Cnpj: string;
+    cnpjPrestador:string;
+    idPrestador: string;
     razaoSocial: string;
-    emailEmpresa: string;
-    paisOrigem: string;
-    dataAbertura: string;
-    regimeTrib: string;
-    naturezaJuridica: string;
-    inscricaoMunicipal: string;
-    agencia: string;
-    banco: string;
-    conta: string;
-    certificadoDigital: string;
-    usuarioPrefeitura: string;
-    senhaPrefeitura: string;
-    usuarioDEISS: string;
-    senhaDEISS: string;
-    status: string;
-    senhaCertificadoDigital: string;
+    socio: string;
+    regProfissional: string;
+    cnpjTomador: string;
+    razaoSocialTomador: string;
+    ruaTomador: string;
+    cidadeTomador: string;
+    ufTomador: string;
+    cepTomador: string;
+    emailTomador: string;
+    inscricaoMunicipalTomador: string;
+    competencia: string;
     codServico: string;
+    valor: string;
+    cargaHoraria: string;
+    localServicos: string;
+    corpoNota: string;
+    outrasInfo: string;
+    retemISS: string;
+    retemIR: string;
+    retemPIS: string;
+    retemCOFINS: string;
+    retemINSS: string;
+    retemCSLL: string;
+    celularDestinatario: string;
+    emailDestinatario: string;
+    ccEmail: string;
+    assunto: string;
   }
 
   const [formDataState, setFormDataState] = useState<FormDataState>({
-    cep: "",
-    rua: "",
-    numero: "",
-    complemento: "",
-    cidade: "",
-    bairro: "",
-    uf: "",
-    IdCadastro: "",
-    medicos: "",
-    Cnpj: "",
+    idPrestador: "",
+    cnpjPrestador: "",
     razaoSocial: "",
-    emailEmpresa: "",
-    paisOrigem: "",
-    dataAbertura: "",
-    regimeTrib: "",
-    naturezaJuridica: "",
-    inscricaoMunicipal: "",
-    agencia: "",
-    banco: "",
-    conta: "",
-    certificadoDigital: "",
-    usuarioPrefeitura: "",
-    senhaPrefeitura: "",
-    usuarioDEISS: "",
-    senhaDEISS: "",
-    status: "",
-    senhaCertificadoDigital: "",
+    socio: "",
+    regProfissional: "",
+    cnpjTomador: "",
+    razaoSocialTomador: "",
+    ruaTomador: "",
+    cidadeTomador: "",
+    ufTomador: "",
+    cepTomador: "",
+    emailTomador: "",
+    inscricaoMunicipalTomador: "",
+    competencia: "",
     codServico: "",
+    valor: "",
+    cargaHoraria: "",
+    localServicos: "",
+    corpoNota: "",
+    outrasInfo: "",
+    retemISS: "",
+    retemIR: "",
+    retemPIS: "",
+    retemCOFINS: "",
+    retemINSS: "",
+    retemCSLL: "",
+    celularDestinatario: "",
+    emailDestinatario: "",
+    ccEmail: "",
+    assunto:"",
   });
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    setFormDataState((prevState) => {
-
-
-      return {
-        ...prevState,
-      };
-    });
+  
+    setFormDataState((prevState) => ({
+      ...prevState,
+      [name]: value, // ✅ Update the specific field in the state
+    }));
   };
+  
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-
-    // Adiciona um novo sócio antes de enviar os dados
-    setFormDataState((prevState) => {
-
-      return {
-        ...prevState,
-        codServico: codigoServico,
-      };
-    });
-
-    // Envia os dados ao backend
+  
+    // Criando o objeto notaData com os dados do formulário
+    const dadosNota = { ...formDataState };
+  
     try {
-      const updatedFormData = {
-        ...formDataState,
-      };
-
-      const response = await fetch(
-        `https://7d90-187-111-23-250.ngrok-free.app/api/cadastroprestador`,
+      const response = await fetch(`${process.env.API_URL}/api/cadastroNotas`,
         {
-          method: "PUT",
+          method: "PUT", // Ou "PUT" se for atualização
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(updatedFormData),
-        },
-      );
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log("Dados enviados com sucesso:", result);
-
-        if (formDataState.Cnpj) {
-          const cnpjSemBarras = formDataState.Cnpj.replace(/[^\d]/g, "");
-          localStorage.setItem("cnpj", cnpjSemBarras);
-          console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
+          body: JSON.stringify(dadosNota), // Convertendo para JSON antes de enviar
         }
-
-        // Lógica após o envio bem-sucedido (ex. limpar formulário ou mostrar mensagem de sucesso)
-      } else {
-        console.error("Erro ao enviar os dados:", response.statusText);
+      );
+  
+      if (!response.ok) {
+        throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
+      }
+  
+      const result = await response.json();
+      console.log("Nota enviada com sucesso:", dadosNota);
+  
+      // Salvar CNPJ no localStorage se necessário
+      if (formDataState.cnpjPrestador) {
+        const cnpjSemBarras = formDataState.cnpjPrestador.replace(/[^\d]/g, "");
+        localStorage.setItem("cnpj", cnpjSemBarras);
+        console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
       }
     } catch (error) {
       console.error("Erro ao enviar os dados:", error);
     }
   };
+  
 
   const handleCnpjSelect = (selectedCnpj: string) => {
     const prestador = cnpjListData.find((p: any) => p.Cnpj === selectedCnpj);
 
     if (prestador) {
-      const expectedKeys = [
-        "nome",
-        "registroProfissional",
-        "email",
-        "telefone",
-        "cpf",
-      ];
-
       setFormDataState((prevState) => ({
         ...prevState,
         IdCadastro: prestador.idCadastro || "",
-        Cnpj: prestador.Cnpj || "",
+        cnpjPrestador: prestador.Cnpj || "",
         razaoSocial: prestador.RazaoSocial || "",
         emailEmpresa: prestador.EmailEmpresa || "",
         paisOrigem: prestador.PaisOrigem || "",
@@ -237,10 +218,9 @@ const FormNotas = () => {
     e.preventDefault(); // Previne a ação padrão de um botão
 
     try {
-      const cnpj = formDataState.Cnpj;
+      const cnpj = formDataState.cnpjPrestador;
 
-      const response = await fetch(
-        "https://7d90-187-111-23-250.ngrok-free.app/api/listarprestadores",
+      const response = await fetch(`${process.env.API_URL}/api/listarprestadores`,
         {
           method: "POST",
           headers: {
@@ -271,42 +251,27 @@ const FormNotas = () => {
 
   const sections = [
     {
-      title: "Empresa",
+      title: "Prestador",
       fields: [
+        {
+          label: "ID",
+          name: "idPrestador",
+          placeholder: "ID",
+        },
         {
           label: "Razão Social",
           name: "razaoSocial",
           placeholder: "Razão Social",
         },
         {
-          label: "Insc. Estadual",
-          name: "inscricaoestadual",
-          placeholder: "Insc. Estadual",
+          label: "Sócio",
+          name: "socio",
+          placeholder: "Sócio",
         },
         {
-          label: "Nome Fantasia",
-          name: "emailEmpresa",
-          placeholder: "Nome Fantasia",
-        },
-        {
-          label: "Natureza da Nota",
-          name: "naturezaNota",
-          placeholder: "Natureza da Nota",
-        },
-        {
-          label: "data de emissão do RPS",
-          name: "dataEmisaoRPS",
-          placeholder: "data de emissão do RPS",
-        },
-        {
-          label: "Data de competência",
-          name: "dataCompetencia",
-          placeholder: "Data de competência",
-        },
-        {
-          label: "Data de emissão da NFS-e",
-          name: "dataEmissaoNF",
-          placeholder: "Data de emissão da NFS-e",
+          label: "Reg. Profissional",
+          name: "regProfissional",
+          placeholder: "Reg. Profissional",
         },
       ],
     },
@@ -314,49 +279,90 @@ const FormNotas = () => {
       title: "Tomador",
       fields: [
         {
-          label: "CNPJ cliente",
-          name: "razaoSocial",
-          placeholder: "CNPJ cliente",
+          label: "CNPJ",
+          name: "cnpjTomador",
+          placeholder: "CNPJ",
         },
         {
-          label: "Razão social cliente",
-          name: "inscricaoestadual",
-          placeholder: "Razão social cliente",
+          label: "Razão social",
+          name: "razaoSocialTomador",
+          placeholder: "Razão social",
         },
         {
-          label: "Rua do Tomador",
-          name: "emailEmpresa",
-          placeholder: "Rua do Tomador",
+          label: "Rua",
+          name: "ruaTomador",
+          placeholder: "Rua",
         },
         {
-          label: "Número do Tomador",
-          name: "naturezaNota",
-          placeholder: "Número do Tomador",
+          label: "Número",
+          name: "numeroTomador",
+          placeholder: "Número",
         },
         {
-          label: "Bairro do Tomador",
-          name: "dataEmisaoRPS",
-          placeholder: "Bairro do Tomador",
+          label: "Bairro",
+          name: "bairroTomador",
+          placeholder: "Bairro",
         },
         {
-          label: "Cidade do Tomador",
-          name: "dataCompetencia",
-          placeholder: "Cidade do Tomador",
+          label: "Cidade",
+          name: "cidadeTomador",
+          placeholder: "Cidade",
         },
         {
-          label: "UF do Tomador",
-          name: "dataEmissaoNF",
-          placeholder: "UF do Tomador",
+          label: "UF",
+          name: "ufTomador",
+          placeholder: "UF",
         },
         {
-          label: "CEP do Tomador",
-          name: "dataEmissaoNF",
-          placeholder: "CEP do Tomador",
+          label: "CEP",
+          name: "cepTomador",
+          placeholder: "CEP",
         },
         {
-          label: "E-MAIL do Tomador",
-          name: "dataEmissaoNF",
-          placeholder: "E-MAIL do Tomador",
+          label: "E-mail",
+          name: "emailTomador",
+          placeholder: "E-mail",
+        },
+        {
+          label: "Inscrição municipal",
+          name: "inscricaoMunicipalTomador",
+          placeholder: "Inscrição municipal",
+        },
+      ],
+    },
+    {
+      title: "Infos",
+      fields: [
+        {
+          label: "Competência",
+          name: "competencia",
+          placeholder: "Competência",
+        },
+        {
+          label: "Valor",
+          name: "valor",
+          placeholder: "Valor",
+        },
+        {
+          label: "Carga Horária",
+          name: "cargaHoraria",
+          placeholder: "Carga Horária",
+        },
+        {
+          label: "Local Serviços Prestados",
+          name: "localServicos",
+          placeholder: "Local Serviços Prestados",
+          extra: "",
+        },
+        {
+          label: "Corpo da Nota",
+          name: "corpoNota",
+          placeholder: "Corpo da Nota",
+        },
+        {
+          label: "Outras Informações",
+          name: "outrasInfo",
+          placeholder: "Outras Informações",
         },
       ],
     },
@@ -364,96 +370,60 @@ const FormNotas = () => {
       title: "Fiscal",
       fields: [
         {
-          label: "Valor desconto",
-          name: "valorDesconto",
-          placeholder: "Valor desconto",
+          label: " Retém ISS",
+          name: "retemISS",
+          placeholder: " Retém ISS",
         },
         {
-          label: "Total da Nota",
-          name: "totalNota",
-          placeholder: "Total da Nota",
+          label: " Retém IR",
+          name: "retemIR",
+          placeholder: " Retém IR",
         },
         {
-          label: "Total Liquido",
-          name: "TotalLiquido",
-          placeholder: "Total Liquido",
+          label: "Retém PIS",
+          name: "retemPIS",
+          placeholder: "Retém PIS",
         },
         {
-          label: "Observações Complementares",
-          name: "obsComplmenetares",
-          placeholder: "Observações Complementares",
-          extra: "",
+          label: "Retém COFINS",
+          name: "retemCOFINS",
+          placeholder: "Retém COFINS",
+        },
+        {
+          label: "Retém INSS",
+          name: "retemINSS",
+          placeholder: "Retém INSS",
+        },
+        {
+          label: "Retém CSLL",
+          name: "retemCSLL",
+          placeholder: "Retém CSLL",
         },
       ],
     },
     {
-      title: "Dados de tributos",
+      title: "Envio",
       fields: [
         {
-          label: "Alíquota ISS %",
-          name: "aliquataISS",
-          placeholder: "Alíquota ISS",
+          label: "Celular Destinatário",
+          name: "celularDestinatario",
+          placeholder: "Celular Destinatário",
         },
         {
-          label: "Alíquota IR %",
-          name: "aliquotaIR",
-          placeholder: "Alíquota IR",
+          label: "E-mail Destinatário",
+          name: "emailDestinatario",
+          placeholder: "E-mail Destinatário",
         },
         {
-          label: "Valor IR",
-          name: "valorIR",
-          placeholder: "Valor IR",
+          label: "CC E-mail",
+          name: "ccEmail",
+          placeholder: "CC E-mail",
         },
         {
-          label: "Valor Deduções",
-          name: "obsComplmenetares",
-          placeholder: "Valor Deduções",
-        },
-        {
-          label: "Alíquota CSLL %",
-          name: "obsComplmenetares",
-          placeholder: "Alíquota CSLL",
-        },
-        {
-          label: "Base Cálculo ISS",
-          name: "obsComplmenetares",
-          placeholder: "Base Cálculo ISS",
-        },
-        {
-          label: "Alíquota PIS %",
-          name: "aliquotaPIS",
-          placeholder: "Alíquota PIS",
-        },
-        {
-          label: "Valor PIS",
-          name: "valorPIS",
-          placeholder: "Valor PIS",
-        },
-        {
-          label: "Valor ISS",
-          name: "valorISS",
-          placeholder: "Valor ISS",
-        },
-        {
-          label: "Alíquota COFINS %",
-          name: "aliquotaCOFINS",
-          placeholder: "Alíquota COFINS",
-        },
-        {
-          label: "Valor COFINS",
-          name: "valorCOFINS",
-          placeholder: "Valor COFINS",
-        },
-        {
-          label: "Alíquota INSS %",
-          name: "aliquotaINSS",
-          placeholder: "Alíquota INSS %",
-        },
-        {
-          label: "Valor INSS",
-          name: "valorINSS",
-          placeholder: "Valor INSS",
-          //Verificar se é retido
+          label: "Assunto",
+          name: "assunto",
+          placeholder: "Assunto",
+          extra: "",
         },
       ],
     },
@@ -490,8 +460,8 @@ const FormNotas = () => {
               <div className="relative flex w-full items-center">
                 <input
                   type="text"
-                  name="Cnpj"
-                  value={formDataState.Cnpj}
+                  name="cnpjPrestador"
+                  value={formDataState.cnpjPrestador}
                   onChange={handleChange}
                   placeholder="CNPJ da empresa"
                   className="w-full rounded border p-2"
@@ -530,7 +500,7 @@ const FormNotas = () => {
           )}
 
           {/* Campo Código Serviço */}
-          {activeTab === 1 && ( // Check if the active tab is "Fiscal" (index 3)
+          {activeTab === 3 && ( // Check if the active tab is "Fiscal" (index 3)
             <div className="mb-4 flex flex-col">
               <label
                 htmlFor="codServico"
@@ -599,7 +569,7 @@ const FormNotas = () => {
 
         {/* Botão para enviar dados da aba ativa */}
         <div className="mt-4 flex justify-end">
-          {activeTab !== sections.length - 0 && (
+          {activeTab === 4 && (
             <button
               type="button"
               className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600"

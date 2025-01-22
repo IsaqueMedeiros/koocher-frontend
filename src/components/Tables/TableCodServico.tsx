@@ -35,7 +35,7 @@ const TableCodServico = () => {
   const fetchData = async () => {
     try {
       const response = await fetch(
-        `https://7d90-187-111-23-250.ngrok-free.app/api/listarcodigos`,
+        `${process.env.API_URL}/api/listarcodigos`,
         {
           method: "POST",
           headers: {
