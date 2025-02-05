@@ -18,6 +18,82 @@ const FormNotas = () => {
   const servicoListRef = useRef<HTMLUListElement | null>(null);
   const [codigoServico, setCodigoServico] = useState<string>("");
 
+  //Listagem CNPJ Tomador
+  const [cnpjTomadorList, setCnpjTomadorList] = useState<Tomador[]>([]);
+  const [showCnpjTomadorList, setShowCnpjTomadorList] = useState(false);
+  const cnpjTomadorListRef = useRef<HTMLUListElement | null>(null);
+
+  type Tomador = {
+    Cnpj: string;
+    RazaoSocial: string;
+    InscricaoMunicipal: string;
+    Cep: string;
+    Rua: string;
+    Numero: string;
+    Complemento: string | null;
+    Bairro: string;
+    Cidade: string;
+    Uf: string;
+    paisOrigem: string | null;
+  };
+
+  const handleTomadorSearchClick = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    e.preventDefault();
+
+    try {
+      const cnpj = formDataState.cnpjTomador;
+
+      const response = await fetch(
+        `${process.env.API_URL}/api/listartomadores`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          //body: JSON.stringify({ cnpj }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro ao buscar os dados do tomador");
+      }
+
+      const data = await response.json();
+      const tomadores = data.Tomadores || [];
+
+      // Store the full tomador objects instead of just CNPJs
+      setCnpjTomadorList(tomadores);
+      setShowCnpjTomadorList(true);
+    } catch (error) {
+      console.error("Erro ao buscar dados do tomador:", error);
+    }
+  };
+
+  const handleTomadorSelect = (selectedCnpj: string) => {
+    const selectedTomador = cnpjTomadorList.find(
+      (tomador: Tomador) => tomador.Cnpj === selectedCnpj,
+    );
+
+    if (selectedTomador) {
+      setFormDataState((prevState) => ({
+        ...prevState,
+        cnpjTomador: selectedTomador.Cnpj, // Correcting by passing the CNPJ as string
+        razaoSocialTomador: selectedTomador.RazaoSocial,
+        inscricaoMunicipalTomador: selectedTomador.InscricaoMunicipal,
+        cepTomador: selectedTomador.Cep,
+        ruaTomador: selectedTomador.Rua,
+        numero: selectedTomador.Numero,
+        numeroTomador: selectedTomador.Complemento || "",
+        bairroTomador: selectedTomador.Bairro,
+        cidadeTomador: selectedTomador.Cidade,
+        ufTomador: selectedTomador.Uf,
+      }));
+    }
+    setShowCnpjTomadorList(false);
+  };
+
   {
     /*----> Codigos para lista de serviço  <---- */
   }
@@ -34,13 +110,10 @@ const FormNotas = () => {
   const handleServicoSearchClick = async () => {
     // Fetch the data when the search button is clicked
     try {
-      const response = await fetch(
-        `${process.env.API_URL}/api/listarcodigos`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      const response = await fetch(`${process.env.API_URL}/api/listarcodigos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (!response.ok) {
         throw new Error("Erro ao buscar os dados");
@@ -64,19 +137,12 @@ const FormNotas = () => {
       codServico: code,
     }));
   };
-
-  useEffect(() => {
-    console.log("Service list visibility changed:", showServicoList);
-  }, [showServicoList]);
-
   {
     /*----> Codigos para lista de serviço (FIM) <---- */
   }
 
-
-
   interface FormDataState {
-    cnpjPrestador:string;
+    cnpjPrestador: string;
     idPrestador: string;
     razaoSocial: string;
     socio: string;
@@ -84,6 +150,8 @@ const FormNotas = () => {
     cnpjTomador: string;
     razaoSocialTomador: string;
     ruaTomador: string;
+    numeroTomador: string;
+    bairroTomador: string;
     cidadeTomador: string;
     ufTomador: string;
     cepTomador: string;
@@ -96,16 +164,18 @@ const FormNotas = () => {
     localServicos: string;
     corpoNota: string;
     outrasInfo: string;
-    retemISS: string;
-    retemIR: string;
-    retemPIS: string;
-    retemCOFINS: string;
-    retemINSS: string;
-    retemCSLL: string;
+    retemISS: boolean;
+    retemIR: boolean;
+    retemPIS: boolean;
+    retemCOFINS: boolean;
+    retemINSS: boolean;
+    retemCSLL: boolean;
     celularDestinatario: string;
     emailDestinatario: string;
     ccEmail: string;
     assunto: string;
+    codCidade:string;
+    codMunicipio: string,
   }
 
   const [formDataState, setFormDataState] = useState<FormDataState>({
@@ -117,6 +187,8 @@ const FormNotas = () => {
     cnpjTomador: "",
     razaoSocialTomador: "",
     ruaTomador: "",
+    numeroTomador: "",
+    bairroTomador: "",
     cidadeTomador: "",
     ufTomador: "",
     cepTomador: "",
@@ -129,51 +201,49 @@ const FormNotas = () => {
     localServicos: "",
     corpoNota: "",
     outrasInfo: "",
-    retemISS: "",
-    retemIR: "",
-    retemPIS: "",
-    retemCOFINS: "",
-    retemINSS: "",
-    retemCSLL: "",
+    retemISS: false,
+    retemIR: false,
+    retemPIS: false,
+    retemCOFINS: false,
+    retemINSS: false,
+    retemCSLL: false,
     celularDestinatario: "",
     emailDestinatario: "",
     ccEmail: "",
-    assunto:"",
+    assunto: "",
+    codCidade: "",
+    codMunicipio: "",
   });
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-  
+
     setFormDataState((prevState) => ({
       ...prevState,
       [name]: value, // ✅ Update the specific field in the state
     }));
   };
-  
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-  
+
     // Criando o objeto notaData com os dados do formulário
     const dadosNota = { ...formDataState };
-  
+
     try {
-      const response = await fetch(`${process.env.API_URL}/api/cadastroNotas`,
-        {
-          method: "PUT", // Ou "PUT" se for atualização
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(dadosNota), // Convertendo para JSON antes de enviar
-        }
-      );
-  
+      const response = await fetch(`${process.env.API_URL}/api/cadastroNotas`, {
+        method: "PUT", // Ou "PUT" se for atualização
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dadosNota), // Convertendo para JSON antes de enviar
+      });
+
       if (!response.ok) {
         throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
       }
-  
-      const result = await response.json();
+
       console.log("Nota enviada com sucesso:", dadosNota);
-  
+
       // Salvar CNPJ no localStorage se necessário
       if (formDataState.cnpjPrestador) {
         const cnpjSemBarras = formDataState.cnpjPrestador.replace(/[^\d]/g, "");
@@ -184,7 +254,6 @@ const FormNotas = () => {
       console.error("Erro ao enviar os dados:", error);
     }
   };
-  
 
   const handleCnpjSelect = (selectedCnpj: string) => {
     const prestador = cnpjListData.find((p: any) => p.Cnpj === selectedCnpj);
@@ -192,18 +261,10 @@ const FormNotas = () => {
     if (prestador) {
       setFormDataState((prevState) => ({
         ...prevState,
-        IdCadastro: prestador.idCadastro || "",
+        idPrestador: prestador.idCadastro || "",
         cnpjPrestador: prestador.Cnpj || "",
         razaoSocial: prestador.RazaoSocial || "",
-        emailEmpresa: prestador.EmailEmpresa || "",
-        paisOrigem: prestador.PaisOrigem || "",
-        dataAbertura: prestador.DataAbertura || "",
-        regimeTrib: prestador.RegimeTributario || "",
-        naturezaJuridica: prestador.NaturezaJuridica || "",
-        inscricaoMunicipal: prestador.InscricaoMunicipal || "",
-        agencia: prestador.Agencia || "",
-        banco: prestador.Banco || "",
-        conta: prestador.Conta || "",
+        regProfissional: prestador.EmailEmpresa || "",
       }));
     }
 
@@ -220,7 +281,8 @@ const FormNotas = () => {
     try {
       const cnpj = formDataState.cnpjPrestador;
 
-      const response = await fetch(`${process.env.API_URL}/api/listarprestadores`,
+      const response = await fetch(
+        `${process.env.API_URL}/api/listarprestadores`,
         {
           method: "POST",
           headers: {
@@ -279,11 +341,6 @@ const FormNotas = () => {
       title: "Tomador",
       fields: [
         {
-          label: "CNPJ",
-          name: "cnpjTomador",
-          placeholder: "CNPJ",
-        },
-        {
           label: "Razão social",
           name: "razaoSocialTomador",
           placeholder: "Razão social",
@@ -312,6 +369,16 @@ const FormNotas = () => {
           label: "UF",
           name: "ufTomador",
           placeholder: "UF",
+        },
+        {
+          label: "Código Do Munícipio",
+          name: "codMunicipio",
+          placeholder: "Código da cidade IBGE"
+        },
+        {
+          label: "Código Do Munícipio",
+          name: "codCidade",
+          placeholder: "Código da cidade IBGE"
         },
         {
           label: "CEP",
@@ -499,6 +566,56 @@ const FormNotas = () => {
             </div>
           )}
 
+          {activeTab === 1 && ( // Assuming Tomador section is at index 1
+            <div className="mb-4 flex flex-col">
+              <label
+                htmlFor="cnpjTomador"
+                className="mb-2 text-sm font-medium text-gray-700"
+              >
+                CNPJ Tomador
+              </label>
+              <div className="relative flex w-full items-center">
+                <input
+                  type="text"
+                  name="cnpjTomador"
+                  value={formDataState.cnpjTomador}
+                  onChange={handleChange}
+                  placeholder="CNPJ do Tomador"
+                  className="w-full rounded border p-2"
+                />
+                <button
+                  type="button"
+                  onClick={handleTomadorSearchClick}
+                  className="absolute right-0 mr-[2%] rounded-[1rem] bg-blue-600 px-4 py-1 text-white hover:bg-blue-700 focus:outline-none"
+                >
+                  <MagnifyingGlassIcon className="h-5 w-5" />
+                </button>
+              </div>
+              {showCnpjTomadorList && (
+                <ul
+                  ref={cnpjTomadorListRef}
+                  className="absolute z-10 ml-[46%] mt-[-5rem] w-[40%] rounded-md border border-gray-300 bg-white shadow-lg"
+                >
+                  {cnpjTomadorList.length > 0 ? (
+                    cnpjTomadorList.map((tomador, index) => (
+                      <li
+                        key={index}
+                        className="cursor-pointer px-4 py-2 hover:bg-gray-100"
+                        onClick={() => handleTomadorSelect(tomador.Cnpj)} // Passing the Cnpj string
+                      >
+                        {tomador.Cnpj} {/* Render the Cnpj value */}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-4 py-2 text-gray-500">
+                      Nenhum CNPJ encontrado
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
+          )}
+
           {/* Campo Código Serviço */}
           {activeTab === 3 && ( // Check if the active tab is "Fiscal" (index 3)
             <div className="mb-4 flex flex-col">
@@ -552,19 +669,37 @@ const FormNotas = () => {
 
           {/* Outros campos */}
           {sections[activeTab].fields.map((field, index) => (
-            <div key={index}>
-              <label className="mb-2 block text-sm font-medium text-black">
-                {field.label}
-              </label>
-              <input
-                name={field.name}
-                value={(formDataState as any)[field.name] || ""}
-                onChange={handleChange}
-                placeholder={field.placeholder}
-                className="w-full rounded-lg border-[1.5px] border-gray-300 px-4 py-2"
-              />
-            </div>
-          ))}
+  <div key={index} className="mb-4">
+    <label className="block text-sm font-medium text-black mb-1">
+      {field.label}
+    </label>
+    {field.name.startsWith("retem") ? (
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          name={field.name}
+          checked={(formDataState as any)[field.name] || false}
+          onChange={(e) => {
+            setFormDataState(prevState => ({
+              ...prevState,
+              [field.name]: e.target.checked
+            }));
+          }}
+          className="form-checkbox h-5 w-5 text-blue-600"
+        />
+        <span className="ml-2 text-sm">{field.label}</span> 
+      </div>
+    ) : (
+      <input
+        name={field.name}
+        value={(formDataState as any)[field.name] || ""}
+        onChange={handleChange}
+        placeholder={field.placeholder}
+        className="w-full rounded-lg border-[1.5px] border-gray-300 px-4 py-2"
+      />
+    )}
+  </div>
+))}
         </form>
 
         {/* Botão para enviar dados da aba ativa */}
@@ -575,7 +710,7 @@ const FormNotas = () => {
               className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600"
               onClick={handleSubmit}
             >
-              Enviar Dados da Aba
+              Emitir NFS-e
             </button>
           )}
         </div>

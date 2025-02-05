@@ -47,7 +47,7 @@ const menuGroups = [
         ),
         label: "Dashboard",
         route: "#",
-        children: [{ label: "Notas Fiscais", route: "/tableNF" }, {  label: "Dados Cadastro", route: "/tableDadosCadastro"} ], 
+        children: [{ label: "Notas Fiscais", route: "/tableNF" }, {  label: "Cadastrar Notas Fiscais", route: "/tableDadosCadastro"} ], 
       },
       {
         icon: (

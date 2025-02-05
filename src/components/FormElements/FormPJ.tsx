@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
 import { Buffer } from "buffer";
-// import CodigoServico from "@/pages/api/CodigoServico";
 
 const FormPJ = () => {
   const [showModal, setShowModal] = useState(false); // Controla o modal de Quadro Societário
@@ -16,11 +15,106 @@ const FormPJ = () => {
   const [servicoList, setServicoList] = useState<CodigoServico[]>([]);
   const [showServicoList, setShowServicoList] = useState(false);
   const servicoListRef = useRef<HTMLUListElement | null>(null);
-  const [codigoServico, setCodigoServico] = useState<string>('');
+  const [codigoServico, setCodigoServico] = useState<string>("");
 
-  {
-    /*----> Codigos para lista de serviço  <---- */
-  }
+  // Codigo para upload certificado didigtal par ao storage:
+
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState(null);
+  const [downloadURL, setDownloadURL] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [password, setPassword] = useState("");
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setSelectedFile(event.target.files[0]);
+    }
+  };
+
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(event.target.value);
+  };
+
+  const handleUpload = async (formDataState: FormDataState) => {
+    if (!selectedFile) {
+      alert("Por favor, selecione um arquivo primeiro.");
+      return;
+    }
+  
+    if (!password) {
+      alert("Por favor, insira a senha do certificado digital.");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("password", password);
+  
+    const cnpj = localStorage.getItem('Cnpj');
+    if (!cnpj) {
+      alert("CNPJ não encontrado no localStorage. Por favor, tente novamente.");
+      return;
+    }
+  
+    // Adiciona todos os campos do formulário ao FormData
+    Object.entries(formDataState).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        // Caso de arrays (quadroSocietario e codServico), transformar em JSON
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value);
+      }
+    });
+  
+    try {
+      const response = await fetch(
+        `${process.env.API_URL}/api/salvarcertificados?cnpj=${encodeURIComponent(cnpj)}`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+  
+      if (response.ok) {
+        alert("Upload concluído com sucesso!");
+      } else {
+        alert("Erro no upload. Por favor, tente novamente.");
+      }
+    } catch (error) {
+      console.error("Erro no upload:", error);
+      alert("Erro no upload. Por favor, tente novamente.");
+    }
+  };
+  
+
+  // API LIST CEP COMPLETO
+
+  const fetchAddress = async (cep: string) => {
+    const cleanCep = cep.replace(/\D/g, ""); // Remove qualquer caractere não numérico
+
+    try {
+      const response = await fetch(
+        `https://viacep.com.br/ws/${cleanCep}/json/`,
+      );
+      if (!response.ok) {
+        throw new Error("Erro ao buscar o endereço");
+      }
+      const data = await response.json();
+
+      // Preenche os campos de endereço com os dados retornados da API
+      setFormDataState((prev: FormDataState) => ({
+        ...prev,
+        rua: data.logradouro || "",
+        bairro: data.bairro || "",
+        cidade: data.localidade || "",
+        uf: data.uf || "",
+      }));
+    } catch (error) {
+      console.error("Erro ao buscar o endereço:", error);
+    }
+  };
+
+  // Codigos para lista de serviço
 
   interface CodigoServico {
     chaveUnica: string;
@@ -31,46 +125,55 @@ const FormPJ = () => {
     const { name, value } = e.target;
     setFormDataState((prevState) => ({ ...prevState, [name]: value }));
   };
-const handleServicoSearchClick = async () => {
-  // Fetch the data when the search button is clicked
-  try {
-    const response = await fetch(
-      `${process.env.API_URL}/api/listarcodigos`,
-
-      {
+  const handleServicoSearchClick = async () => {
+    // Fetch the data when the search button is clicked
+    try {
+      const response = await fetch(`${process.env.API_URL}/api/listarcodigos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-      }
-    );
+      });
 
-    if (!response.ok) {
-      throw new Error("Erro ao buscar os dados");
+      if (!response.ok) {
+        throw new Error("Erro ao buscar os dados");
+      }
+
+      const result = await response.json();
+      setServicoList(result.CodigosServico); // Update the servicoList state
+      setShowServicoList(true); // Show the list once the data is fetched
+    } catch (error) {
+      console.error("Erro ao carregar os dados", error);
+    }
+  };
+
+  const handleServicoSelect = (service: string | CodigoServico) => {
+    let currentServices = formDataState.codServico;
+    const serviceKey =
+      typeof service === "string" ? service : service.chaveUnica;
+
+    if (
+      currentServices.some((existing) => {
+        const existingKey =
+          typeof existing === "string" ? existing : existing.chaveUnica;
+        return existingKey === serviceKey;
+      })
+    ) {
+      // If service exists in the array, remove it
+      currentServices = currentServices.filter((existing) => {
+        const existingKey =
+          typeof existing === "string" ? existing : existing.chaveUnica;
+        return existingKey !== serviceKey;
+      });
+    } else {
+      // If it doesn't exist, add it
+      currentServices = [...currentServices, service];
     }
 
-    const result = await response.json();
-    setServicoList(result.CodigosServico); // Update the servicoList state
-    setShowServicoList(true); // Show the list once the data is fetched
-  } catch (error) {
-    console.error("Erro ao carregar os dados", error);
-  }
-};
-
-const handleServicoSelect = (service: string | CodigoServico) => {
-  const code = typeof service === 'string' ? service : `${service.chaveUnica} - ${service.descricao}`;
-  setFormDataState((prevState) => ({
-    ...prevState,
-    codServico: code,
-  }));
-};
-
-
-  useEffect(() => {
-    console.log("Service list visibility changed:", showServicoList);
-  }, [showServicoList]);
-
-  {
-    /*----> Codigos para lista de serviço (FIM) <---- */
-  }
+    setFormDataState((prevState) => ({
+      ...prevState,
+      codServico: currentServices,
+    }));
+  };
+  // Codigos para lista de serviço FIM
 
   interface QuadroSocietario {
     nome: string;
@@ -108,9 +211,8 @@ const handleServicoSelect = (service: string | CodigoServico) => {
     usuarioDEISS: string;
     senhaDEISS: string;
     status: string;
-    senhaCertificadoDigital: string;
     quadroSocietario: QuadroSocietario[];
-    codServico: string;
+    codServico: (string | CodigoServico)[];
   }
 
   const [formDataState, setFormDataState] = useState<FormDataState>({
@@ -140,63 +242,45 @@ const handleServicoSelect = (service: string | CodigoServico) => {
     usuarioDEISS: "",
     senhaDEISS: "",
     status: "",
-    senhaCertificadoDigital: "",
     quadroSocietario: [],
-    codServico: "",
+    codServico: [],
   });
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-  
+
+    // Verifica se o campo alterado é o CNPJ
+  if (name === 'Cnpj') {
+    // Salva o novo CNPJ no localStorage
+    localStorage.setItem('Cnpj', value);
+    console.log('CNPJ salvo no localstorage')
+  }
+
     setFormDataState((prevState) => {
       // Se o campo for parte de 'quadroSocietario', atualiza o último sócio
-      if (prevState.quadroSocietario.some((socio) => socio.hasOwnProperty(name))) {
+      if (
+        prevState.quadroSocietario.some((socio) => socio.hasOwnProperty(name))
+      ) {
         const newSocios = [...prevState.quadroSocietario];
-  
+
         if (newSocios.length > 0) {
           newSocios[newSocios.length - 1] = {
             ...newSocios[newSocios.length - 1],
             [name]: value,
           };
         }
-  
+
         return { ...prevState, quadroSocietario: newSocios };
       }
-  
+
       // Se o campo for um campo normal, apenas atualiza o estado normalmente
       return { ...prevState, [name]: value };
     });
-  };
-  
-
-  const fetchAddress = async (cep: string) => {
-    const cleanCep = cep.replace(/\D/g, ""); // Remove qualquer caractere não numérico
-
-    try {
-      const response = await fetch(
-        `https://viacep.com.br/ws/${cleanCep}/json/`,
-      );
-      if (!response.ok) {
-        throw new Error("Erro ao buscar o endereço");
-      }
-      const data = await response.json();
-
-      // Preenche os campos de endereço com os dados retornados da API
-      setFormDataState((prev: FormDataState) => ({
-        ...prev,
-        rua: data.logradouro || "",
-        bairro: data.bairro || "",
-        cidade: data.localidade || "",
-        uf: data.uf || "",
-      }));
-    } catch (error) {
-      console.error("Erro ao buscar o endereço:", error);
-    }
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
-    // Adiciona um novo sócio antes de enviar os dados
+    // Add a new partner before submitting data
     setFormDataState((prevState) => {
       const newSocios = [...prevState.quadroSocietario];
       if (
@@ -214,15 +298,17 @@ const handleServicoSelect = (service: string | CodigoServico) => {
       return {
         ...prevState,
         quadroSocietario: newSocios,
-        codServico: codigoServico,
       };
     });
 
-    // Envia os dados ao backend
     try {
+      // Convert codServico to JSON
+      const codServicoJson = JSON.stringify(formDataState.codServico);
+
       const updatedFormData = {
         ...formDataState,
         quadroSocietario: JSON.stringify(formDataState.quadroSocietario),
+        codServico: codServicoJson, // Here we use the JSON string instead of the array
       };
 
       const response = await fetch(
@@ -240,13 +326,13 @@ const handleServicoSelect = (service: string | CodigoServico) => {
         const result = await response.json();
         console.log("Dados enviados com sucesso:", result);
 
-        if (formDataState.Cnpj) {
-          const cnpjSemBarras = formDataState.Cnpj.replace(/[^\d]/g, "");
-          localStorage.setItem("cnpj", cnpjSemBarras);
-          console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
-        }
+        // if (formDataState.Cnpj) {
+        //   const cnpjSemBarras = formDataState.Cnpj.replace(/[^\d]/g, "");
+        //   localStorage.setItem("cnpj", cnpjSemBarras);
+        //   console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
+        // }
 
-        // Lógica após o envio bem-sucedido (ex. limpar formulário ou mostrar mensagem de sucesso)
+        // Logic after successful submission (e.g., clear form or show success message)
       } else {
         console.error("Erro ao enviar os dados:", response.statusText);
       }
@@ -445,45 +531,6 @@ const handleServicoSelect = (service: string | CodigoServico) => {
     {
       title: "Acessos",
       fields: [
-        //  { label: "Certificado Digital", name: "certificadoDigital", placeholder: "Certificado Digital" }, ARQUIVO .PFX ?? .P12
-        // {
-        //   label: "Certificado Digital",
-        //   name: "certificadoDigital",
-        //   type: "file",
-        //   onChange: async (e: React.ChangeEvent<HTMLInputElement>) => {
-        //     if (e.target.files && e.target.files[0]) {
-        //       const file = e.target.files[0];
-        //       setFile(file);
-
-        //       try {
-        //         const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
-        //           const reader = new FileReader();
-        //           reader.onload = () => resolve(reader.result as ArrayBuffer);
-        //           reader.onerror = reject;
-        //           reader.readAsArrayBuffer(file);
-        //         });
-
-        //         const buffer = Buffer.from(arrayBuffer);
-        //         const url = await handler(buffer, file.name, "certificados");
-        //         if (typeof url === 'string') { // Verifica se url é uma string
-        //           setFileUrl(url);
-        //           setFormDataState(prev => ({
-        //             ...prev,
-        //             certificadoDigital: url
-        //           }));
-        //         }
-        //       } catch (error) {
-        //         console.error("Erro ao fazer upload:", error);
-        //         // Handle error here, perhaps show a user-friendly message
-        //       }
-        //     }
-        //   }
-        // },
-        {
-          label: "Senha Certificado Digital",
-          name: "senhaCertificadoDigital",
-          placeholder: "Senha Certificado Digital",
-        },
         {
           label: "Usuario Prefeitura",
           name: "usuarioPrefeitura",
@@ -661,8 +708,8 @@ const handleServicoSelect = (service: string | CodigoServico) => {
               )}
             </div>
           )}
+          {/* Campo para Procura dos códigos de serviços */}
 
-          {/* Campo Código Serviço */}
           {activeTab === 3 && ( // Check if the active tab is "Fiscal" (index 3)
             <div className="mb-4 flex flex-col">
               <label
@@ -675,11 +722,18 @@ const handleServicoSelect = (service: string | CodigoServico) => {
                 <input
                   type="text"
                   name="codServico"
-                  value={formDataState.codServico}
+                  value={formDataState.codServico
+                    .map((service) =>
+                      typeof service === "string"
+                        ? service
+                        : `${service.chaveUnica} - ${service.descricao}`,
+                    )
+                    .join(", ")}
                   onChange={handleServicoChange}
                   placeholder="Digite o Código do Serviço"
                   className="w-full rounded border p-2"
                 />
+
                 <button
                   type="button"
                   onClick={handleServicoSearchClick}
@@ -698,9 +752,23 @@ const handleServicoSelect = (service: string | CodigoServico) => {
                       <li
                         key={index}
                         className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-                        onClick={() => handleServicoSelect(codServico)}
                       >
-                        {codServico.chaveUnica} - {codServico.descricao}
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={formDataState.codServico.some(
+                              (service) => {
+                                const serviceKey =
+                                  typeof service === "string"
+                                    ? service
+                                    : service.chaveUnica;
+                                return serviceKey === codServico.chaveUnica;
+                              },
+                            )}
+                            onChange={() => handleServicoSelect(codServico)}
+                          />
+                          {codServico.chaveUnica} - {codServico.descricao}
+                        </label>
                       </li>
                     ))
                   ) : (
@@ -710,6 +778,78 @@ const handleServicoSelect = (service: string | CodigoServico) => {
                   )}
                 </ul>
               )}
+            </div>
+          )}
+
+          {/* Campo upload File */}
+          <div
+            className={`mb-4 flex flex-col space-y-4 ${activeTab === 3 ? "" : "hidden"}`}
+          >
+            <label
+              htmlFor="fileUpload"
+              className="text-sm font-medium text-gray-700"
+            >
+              Upload de Certificado Digital
+            </label>
+            <div className="w-full">
+              <input
+                type="file"
+                id="fileUpload"
+                onChange={handleFileChange}
+                className="block w-full cursor-pointer rounded-lg border border-gray-300 bg-gray-50 text-sm text-gray-900 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:placeholder-gray-400"
+              />
+            </div>
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-gray-700"
+            >
+              Senha do Certificado Digital
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={handlePasswordChange}
+              placeholder="Digite a senha do certificado"
+              className="w-full rounded border p-2"
+            />
+            <button
+              type="button"
+              onClick={() => handleUpload(formDataState)} // Chama a função corretamente
+              className="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              Enviar Arquivo
+            </button>
+
+          </div>
+
+          {/* Exibir progresso do upload */}
+          {uploadProgress > 0 && uploadProgress < 100 && (
+            <div className="mt-4 h-2.5 w-full rounded-full bg-gray-200">
+              <div
+                className="h-2.5 rounded-full bg-blue-600"
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+          )}
+
+          {uploadError && (
+            <div className="mt-4 text-sm text-red-600">
+              Erro no upload: {uploadError}
+            </div>
+          )}
+
+          {downloadURL && (
+            <div className="mt-4 text-sm text-green-600">
+              Upload concluído!{" "}
+              <a
+                href={downloadURL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-green-800"
+              >
+                Acesse o arquivo aqui.
+              </a>
             </div>
           )}
 
