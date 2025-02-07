@@ -231,7 +231,7 @@ const FormNotas = () => {
 
     try {
       const response = await fetch(`${process.env.API_URL}/api/cadastroNotas`, {
-        method: "PUT", // Ou "PUT" se for atualização
+        method: "POST", // Ou "PUT" se for atualização
         headers: {
           "Content-Type": "application/json",
         },

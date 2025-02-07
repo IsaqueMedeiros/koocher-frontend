@@ -37,54 +37,99 @@ const FormPJ = () => {
 
   const handleUpload = async (formDataState: FormDataState) => {
     if (!selectedFile) {
-      alert("Por favor, selecione um arquivo primeiro.");
-      return;
+        alert("Por favor, selecione um arquivo primeiro.");
+        return;
     }
-  
+
     if (!password) {
-      alert("Por favor, insira a senha do certificado digital.");
-      return;
+        alert("Por favor, insira a senha do certificado digital.");
+        return;
     }
-  
+
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("password", password);
-  
-    const cnpj = localStorage.getItem('Cnpj');
-    if (!cnpj) {
-      alert("CNPJ não encontrado no localStorage. Por favor, tente novamente.");
-      return;
-    }
-  
-    // Adiciona todos os campos do formulário ao FormData
-    Object.entries(formDataState).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        // Caso de arrays (quadroSocietario e codServico), transformar em JSON
-        formData.append(key, JSON.stringify(value));
-      } else {
-        formData.append(key, value);
-      }
-    });
-  
-    try {
-      const response = await fetch(
-        `${process.env.API_URL}/api/salvarcertificados?cnpj=${encodeURIComponent(cnpj)}`,
-        {
-          method: "POST",
-          body: formData,
+
+    const codServicoJson = JSON.stringify(formDataState.codServico);
+    // Mapeando os dados do formulário para o objeto companyData
+    const companyData = {
+        federalTaxNumber: formDataState.Cnpj || '33986596000108', // Use o CNPJ fornecido
+        name: formDataState.razaoSocial || 'Isaque', // Use a razão social fornecida
+        tradeName: formDataState.razaoSocial || 'Boutique', // Supondo que você tenha um campo para nome fantasia
+        municipalTaxNumber: formDataState.inscricaoMunicipal || '12345', // Use a inscrição municipal fornecida
+        taxRegime: formDataState.regimeTrib || 'SimplesNacional', // Use o regime tributário fornecido
+        specialTaxRegime: 'Nenhum', // Mantém como fictício ou faça um mapeamento
+        address: {
+            country: formDataState.paisOrigem || 'BRA', // Use o país de origem
+            postalCode: formDataState.cep || '12345678', // Use o CEP fornecido
+            street: formDataState.rua || 'Desembargador Amílcar', // Use a rua fornecida
+            number: formDataState.numero || '123', // Use o número fornecido
+            additionalInformation: formDataState.complemento || 'Sala 1', // Use o complemento fornecido
+            district: formDataState.bairro || 'Bairro Exemplo', // Use o bairro fornecido
+            city: {
+                code: formDataState.codIBGE || '3550308', // Use o código IBGE ou um valor fictício
+                name: formDataState.cidade || 'São Paulo', // Use a cidade fornecida
+            },
+            state: formDataState.uf || 'SP', // Use o estado fornecido
         },
-      );
-  
-      if (response.ok) {
-        alert("Upload concluído com sucesso!");
-      } else {
-        alert("Erro no upload. Por favor, tente novamente.");
-      }
+        email: formDataState.emailEmpresa || 'email@empresa.com', // Use o email fornecido
+        openningDate: formDataState.dataAbertura || '2025-01-28T15:00:08.326Z', // Use a data de abertura fornecida
+        legalNature: formDataState.naturezaJuridica || 'EmpresaPublica', // Use a natureza jurídica fornecida
+        economicActivities: [
+            {
+                type: 'Main',
+                code: '0',
+            }
+        ],
+        companyRegistryNumber: formDataState.Cnpj || '33986596000108', // Use o CNPJ fornecido
+        regionalTaxNumber: '0', // Mantém como fictício
+        rpsSerialNumber: codServicoJson || 'ABC', // Use o código do serviço ou um valor fictício
+        rpsNumber: '1', // Mantém como fictício
+        issRate: '5', // Mantém como fictício
+        environment: 'Development', // Mantém como fictício
+        fiscalStatus: 'CityNotSupported', // Mantém como fictício
+        federalTaxDetermination: 'NotInformed', // Mantém como fictício
+        municipalTaxDetermination: 'NotInformed', // Mantém como fictício
+        loginName: formDataState.usuarioPrefeitura || 'login', // Use o nome de usuário da prefeitura fornecido
+        loginPassword: formDataState.senhaPrefeitura || '024', // Use a senha da prefeitura fornecida
+        authIssueValue: '500', // Mantém como fictício
+        certificate: {
+            thumbprint: 'string', // Mantém como fictício
+            modifiedOn: '2025-01-28T15:00:08.326Z', // Mantém como fictício
+            expiresOn: '2025-01-28T15:00:08.326Z', // Mantém como fictício
+            status: 'Overdue', // Mantém como fictício
+        }
+    };
+
+    // Convertendo o objeto companyData para string JSON
+    formData.append("companyData", JSON.stringify(companyData));
+
+    // Pegando o CNPJ do localStorage se necessário
+    const cnpj = localStorage.getItem("cnpj");
+
+    try {
+        const response = await fetch(
+            `${process.env.API_URL}/api/salvarcertificados?cnpj=${encodeURIComponent(cnpj || formDataState.Cnpj)}`,
+            {
+                method: "POST",
+                body: formData,
+            }
+        );
+
+        if (response.ok) {
+            alert("Upload concluído com sucesso!");
+        } else {
+            const errorText = await response.text();
+            alert(`Erro no upload: ${errorText}`);
+        }
     } catch (error) {
-      console.error("Erro no upload:", error);
-      alert("Erro no upload. Por favor, tente novamente.");
+        console.error("Erro no upload:", error);
+        alert("Erro no upload. Por favor, tente novamente.");
     }
-  };
+};
+
+
+
   
 
   // API LIST CEP COMPLETO
@@ -213,6 +258,7 @@ const FormPJ = () => {
     status: string;
     quadroSocietario: QuadroSocietario[];
     codServico: (string | CodigoServico)[];
+    codIBGE: string,
   }
 
   const [formDataState, setFormDataState] = useState<FormDataState>({
@@ -244,16 +290,17 @@ const FormPJ = () => {
     status: "",
     quadroSocietario: [],
     codServico: [],
+    codIBGE: "",
   });
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     // Verifica se o campo alterado é o CNPJ
-  if (name === 'Cnpj') {
-    // Salva o novo CNPJ no localStorage
-    localStorage.setItem('Cnpj', value);
-    console.log('CNPJ salvo no localstorage')
-  }
+    if (name === 'Cnpj') {
+      console.log('Valor do CNPJ antes de salvar:', value); // Debug
+      localStorage.setItem('cnpj', value);
+      console.log('CNPJ salvo no localStorage');
+    }
 
     setFormDataState((prevState) => {
       // Se o campo for parte de 'quadroSocietario', atualiza o último sócio
@@ -326,11 +373,11 @@ const FormPJ = () => {
         const result = await response.json();
         console.log("Dados enviados com sucesso:", result);
 
-        // if (formDataState.Cnpj) {
-        //   const cnpjSemBarras = formDataState.Cnpj.replace(/[^\d]/g, "");
-        //   localStorage.setItem("cnpj", cnpjSemBarras);
-        //   console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
-        // }
+        if (formDataState.Cnpj) {
+          const cnpjSemBarras = formDataState.Cnpj.replace(/[^\d]/g, "");
+          localStorage.setItem("cnpj", cnpjSemBarras);
+          console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
+        }
 
         // Logic after successful submission (e.g., clear form or show success message)
       } else {
@@ -519,6 +566,7 @@ const FormPJ = () => {
           placeholder: "Complemento",
         },
         { label: "Cidade", name: "cidade", placeholder: "Cidade" },
+        { label: "Código da cidade IBGE", name: "codIBGE", placeholder: "Código da cidade IBGE" },
         { label: "Bairro", name: "bairro", placeholder: "Bairro" },
         { label: "UF", name: "uf", placeholder: "UF" },
         {
