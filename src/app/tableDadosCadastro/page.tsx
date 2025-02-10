@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 const TablesPage = () => {
   return (
-    <DefaultLayout>
-      <Breadcrumb pageName="NFS-e" />
+    <DefaultLayout >
+      <Breadcrumb pageName="Emitir NFS-e" />
 
       <div className="flex flex-col gap-10">
         <FormNotas />
