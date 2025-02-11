@@ -14,77 +14,70 @@ const CadastroPrestador = () => {
     setActiveForm((prev) => (prev === panel ? null : panel));
   };
 
+  interface SidebarButtonProps {
+    label: string;
+    active: boolean;
+    onClick: () => void;
+  }
+  
+  function SidebarButton({ label, active, onClick }: SidebarButtonProps) {
+    return (
+      <button
+        onClick={onClick}
+        className={`w-full flex items-center px-4 py-3 rounded-md transition-all duration-300 border-l-4 text-left
+          ${active ? "border-[#690099] bg-[#b000ff] dark:bg-[#b000ff] text-white dark:text-white" : "border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`}
+      >
+       <b>{label}</b> 
+      </button>
+    );
+  }
+  
+
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Cadastros" />
+    <Breadcrumb pageName="Cadastros" />
 
-      <div className="grid w-full grid-cols-1 gap-9 sm:grid-cols-1">
-        <div className="flex-cols-2 flex w-full gap-9">
-          {/* Form Section */}
-          <div className="h-[20rem] w-[25%] rounded-md border border-stroke shadow-2xl dark:border-strokedark dark:bg-boxdark">
-            <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-              <h1 className="font-medium text-black dark:text-white">
-                Lista de Cadastros
-              </h1>
-            </div>
-
-            <div className="mt-[2.5rem] flex w-full flex-col items-center">
-              {/* Botão para abrir painel de Prestador */}
-              <div className="flex w-min flex-row items-center justify-center p-4 ml-8">
-                <button
-                  onClick={() => handlePanelChange("prestador")}
-                  className={`flex h-[2rem] w-[18rem] flex-row items-center justify-start border-l-2 ${
-                    activeForm === "prestador" ? "border-cyan-600" : "border-gray-300"
-                  }`}
-                >
-                  <p className="text-md ml-[5%] text-black dark:text-white">Cadastrar Prestador</p>
-                </button>
-              </div>
-
-              {/* Botão para abrir painel de Tomador */}
-              <div className="flex w-min flex-row items-center justify-center p-4 ml-8">
-                <button
-                  onClick={() => handlePanelChange("tomador")}
-                  className={`flex h-[2rem] w-[18rem] flex-row items-center justify-start border-l-2 ${
-                    activeForm === "tomador" ? "border-cyan-600" : "border-gray-300"
-                  }`}
-                >
-                  <p className="text-md ml-[5%] text-black dark:text-white">Cadastrar Tomador</p>
-                </button>
-              </div>
-
-              {/* Botão para abrir painel de Codigo */}
-              <div className="flex w-min flex-row items-center justify-center p-4 ml-8">
-                <button
-                  onClick={() => handlePanelChange("codigo")}
-                  className={`flex h-[2rem] w-[18rem] flex-row items-center justify-start border-l-2 ${
-                    activeForm === "codigo" ? "border-cyan-600" : "border-gray-300"
-                  }`}
-                >
-                  <p className="text-md ml-[5%] text-black dark:text-white">Código de Serviço</p>
-                </button>
-              </div>
-            </div>
+    <div className="w-full grid grid-cols-1 gap-9 sm:grid-cols-1 p-6">
+      <div className="flex w-full gap-9 flex-col md:flex-row">
+        {/* Sidebar */}
+        <div className="w-full h-[30vh] md:w-1/4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-300 dark:border-gray-700 p-6">
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white border-b pb-4">Lista de Cadastros</h1>
+          
+          <div className="mt-6 flex flex-col gap-4">
+            <SidebarButton
+              label="Cadastrar Prestador"
+              active={activeForm === "prestador"}
+              onClick={() => handlePanelChange("prestador")}
+            />
+            <SidebarButton
+              label="Cadastrar Tomador"
+              active={activeForm === "tomador"}
+              onClick={() => handlePanelChange("tomador")}
+            />
+            <SidebarButton
+              label="Código de Serviço"
+              active={activeForm === "codigo"}
+              onClick={() => handlePanelChange("codigo")}
+            />
           </div>
+        </div>
 
-          {/* Painéis Laterais */}
-          <div className="relative flex-1 rounded-md border border-stroke shadow-2xl dark:border-strokedark dark:bg-boxdark">
-            <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-              <h1 className="font-medium text-black dark:text-white">Formulário</h1>
-            </div>
+        {/* Formulário */}
+        <div className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-300 dark:border-gray-700 p-6">
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white border-b pb-4">Formulário</h1>
 
-            <div className="p-6">
-              {activeForm === "prestador" && <FormPJ />}
-              {activeForm === "tomador" && <FormTomador />}
-              {activeForm === "codigo" && <FormCodServico />}
-              {!activeForm && (
-                <p className="text-gray-500 dark:text-white">Selecione uma opção para visualizar o formulário.</p>
-              )}
-            </div>
+          <div className="mt-6">
+            {activeForm === "prestador" && <FormPJ />}
+            {activeForm === "tomador" && <FormTomador />}
+            {activeForm === "codigo" && <FormCodServico />}
+            {!activeForm && (
+              <p className="text-gray-500 dark:text-gray-300">Selecione uma opção para visualizar o formulário.</p>
+            )}
           </div>
         </div>
       </div>
-    </DefaultLayout>
+    </div>
+  </DefaultLayout>
   );
 };
 

@@ -105,7 +105,7 @@ const FormCodServico = () => {
           key={index}
           onClick={() => setActiveTab(index)}
           className={`p-4 w-full text-center ${
-            activeTab === index ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-500"
+            activeTab === index ? "border-b-2 border-[#b000ff] text-[#b000ff]" : "text-gray-500"
           }`}
         >
           {section.title}
@@ -133,7 +133,7 @@ const FormCodServico = () => {
       <div className="mt-4 flex justify-end">
     <button
       type="button"
-      className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+      className="bg-[#b000ff] text-white px-6 py-2 rounded-lg hover:bg-[#690099]"
       onClick={handleSubmit}
     >
       Enviar Dados da Aba

@@ -79,7 +79,7 @@ const menuGroups = [
         ),
         label: "Cadastros",
         route: "#",
-        children: [{ label: "Novo", route: "/cadastroPrestador" }, {  label: "Prestador", route: "/tablePrestador"}, {  label: "Tomador", route: "/tableTomador"}, {  label: "Serviços", route: "/tableCodServico"} , {  label: "Sócios", route: "/tableSocio"}], 
+        children: [{ label: "Novo", route: "/cadastroPrestador" }, {  label: "Prestador", route: "/tablePrestador"}, {  label: "Tomador", route: "/tableTomador"}, {  label: "Serviços", route: "/tableCodServico"} , ], 
       },
       
       // {

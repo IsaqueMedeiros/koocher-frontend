@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
 import { Buffer } from "buffer";
 import TableNotas from "../Tables/TableNotas";
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 const FormNotas = () => {
   const [showModal, setShowModal] = useState(false); // Controla o modal de Quadro Societário
@@ -43,8 +44,6 @@ const FormNotas = () => {
     e.preventDefault();
 
     try {
-      const cnpj = formDataState.cnpjTomador;
-
       const response = await fetch(
         `${process.env.API_URL}/api/listartomadores`,
         {
@@ -84,8 +83,8 @@ const FormNotas = () => {
         inscricaoMunicipalTomador: selectedTomador.InscricaoMunicipal,
         cepTomador: selectedTomador.Cep,
         ruaTomador: selectedTomador.Rua,
-        numero: selectedTomador.Numero,
-        numeroTomador: selectedTomador.Complemento || "",
+        numeroTomador: selectedTomador.Numero,
+        complementoTomador: selectedTomador.Complemento || "",
         bairroTomador: selectedTomador.Bairro,
         cidadeTomador: selectedTomador.Cidade,
         ufTomador: selectedTomador.Uf,
@@ -151,6 +150,7 @@ const FormNotas = () => {
     razaoSocialTomador: string;
     ruaTomador: string;
     numeroTomador: string;
+    complementoTomador: string;
     bairroTomador: string;
     cidadeTomador: string;
     ufTomador: string;
@@ -188,6 +188,7 @@ const FormNotas = () => {
     razaoSocialTomador: "",
     ruaTomador: "",
     numeroTomador: "",
+    complementoTomador: "",
     bairroTomador: "",
     cidadeTomador: "",
     ufTomador: "",
@@ -221,11 +222,6 @@ const FormNotas = () => {
       ...prevState,
       [name]: value, // ✅ Update the specific field in the state
     }));
-
-    // Se o campo alterado for a razão social, chama a função buscarNotas
-    if (name === "razaoSocial" && value.trim() !== "") {
-      buscarNotas(value);
-    }
   };
   // ----> BUSCAR NOTA ATRAVÉS DO NOME NO NFE.IO
 
@@ -245,6 +241,12 @@ const FormNotas = () => {
 
   const [certExpiration, setCertExpiration] = useState("");
   const [isCertExpired, setIsCertExpired] = useState(false);
+
+  useEffect(() => {
+    if (formDataState.razaoSocialTomador.trim() !== "") {
+      buscarNotas(formDataState.razaoSocialTomador);
+    }
+  }, [formDataState.razaoSocialTomador]);
 
   const buscarNotas = async (razaoSocial: string) => {
     setLoading(true);
@@ -298,7 +300,7 @@ const FormNotas = () => {
     }
   };
 
-  //---->BUSCAR NOTA ATRAVÉS DO NFE.IO<----
+  //---->BUSCAR NOTA ATRAVÉS DO NFE.IO FIM<----
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -332,6 +334,12 @@ const FormNotas = () => {
     }
   };
 
+  // BUSCAR PRESTADORES
+
+  const [selectedSocios, setSelectedSocios] = useState<any[]>([]);
+  const [sociosDisponiveis, setSociosDisponiveis] = useState<any[]>([]);
+  const [sociosFound, setSociosFound] = useState(false);
+
   const handleCnpjSelect = (selectedCnpj: string) => {
     const prestador = cnpjListData.find((p: any) => p.Cnpj === selectedCnpj);
 
@@ -343,9 +351,35 @@ const FormNotas = () => {
         razaoSocial: prestador.RazaoSocial || "",
         regProfissional: prestador.EmailEmpresa || "",
       }));
+
+      // Check if there's a partner list
+      if (
+        Array.isArray(prestador.QuadroSocietario) &&
+        prestador.QuadroSocietario.length > 0
+      ) {
+        setSociosDisponiveis(prestador.QuadroSocietario);
+      } else {
+        setSociosDisponiveis([]); // Garante que não seja undefined
+      }
     }
 
     setShowCnpjList(false);
+  };
+
+  const handleSocioSelection = (socio: any) => {
+    setSelectedSocios((prevSocios) => {
+      const isSelected = prevSocios.find((s) => s.id === socio.id);
+
+      if (isSelected) {
+        return prevSocios.filter((s) => s.id !== socio.id);
+      }
+
+      if (prevSocios.length < 5) {
+        return [...prevSocios, socio];
+      }
+
+      return prevSocios;
+    });
   };
 
   // Certifique-se de que você tem um estado para armazenar os dados completos dos prestadores
@@ -374,6 +408,7 @@ const FormNotas = () => {
       }
 
       const data = await response.json();
+      console.log(data);
       const prestadores = data.prestadores || [];
 
       // Armazena todos os dados dos prestadores
@@ -433,6 +468,11 @@ const FormNotas = () => {
           placeholder: "Número",
         },
         {
+          label: "Complemento",
+          name: "complementoTomador",
+          placeholder: "Complemento",
+        },
+        {
           label: "Bairro",
           name: "bairroTomador",
           placeholder: "Bairro",
@@ -450,11 +490,6 @@ const FormNotas = () => {
         {
           label: "Código Do Munícipio",
           name: "codMunicipio",
-          placeholder: "Código da cidade IBGE",
-        },
-        {
-          label: "Código Do Munícipio",
-          name: "codCidade",
           placeholder: "Código da cidade IBGE",
         },
         {
@@ -545,32 +580,32 @@ const FormNotas = () => {
         },
       ],
     },
-    {
-      title: "Envio",
-      fields: [
-        {
-          label: "Celular Destinatário",
-          name: "celularDestinatario",
-          placeholder: "Celular Destinatário",
-        },
-        {
-          label: "E-mail Destinatário",
-          name: "emailDestinatario",
-          placeholder: "E-mail Destinatário",
-        },
-        {
-          label: "CC E-mail",
-          name: "ccEmail",
-          placeholder: "CC E-mail",
-        },
-        {
-          label: "Assunto",
-          name: "assunto",
-          placeholder: "Assunto",
-          extra: "",
-        },
-      ],
-    },
+    // {
+    //   title: "Envio",
+    //   fields: [
+    //     {
+    //       label: "Celular Destinatário",
+    //       name: "celularDestinatario",
+    //       placeholder: "Celular Destinatário",
+    //     },
+    //     {
+    //       label: "E-mail Destinatário",
+    //       name: "emailDestinatario",
+    //       placeholder: "E-mail Destinatário",
+    //     },
+    //     {
+    //       label: "CC E-mail",
+    //       name: "ccEmail",
+    //       placeholder: "CC E-mail",
+    //     },
+    //     {
+    //       label: "Assunto",
+    //       name: "assunto",
+    //       placeholder: "Assunto",
+    //       extra: "",
+    //     },
+    //   ],
+    // },
   ];
 
   // ENVIO CERTIFICADO DIGITAL BACKEND
@@ -649,51 +684,55 @@ const FormNotas = () => {
           </label>
           <div
             className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-semibold shadow ${
-              isCertExpired
-                ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-                : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+              !certExpiration
+                ? "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400" // Cor padrão
+                : isCertExpired
+                  ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300" // Expirado
+                  : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" // Válido
             }`}
           >
             <span>
               {certExpiration ? certExpiration : "Nenhuma data encontrada"}
             </span>
-            {isCertExpired ? (
-              <span className="ml-2 flex items-center">
-                <svg
-                  className="h-5 w-5 text-red-600 dark:text-red-300"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M4.293 4.293a1 1 0 011.414 0L12 10.586l6.293-6.293a1 1 0 111.414 1.414L13.414 12l6.293 6.293a1 1 0 01-1.414 1.414L12 13.414l-6.293 6.293a1 1 0 01-1.414-1.414z"
-                  />
-                </svg>
-                <span className="ml-1">Certificado Expirado</span>
-              </span>
-            ) : (
-              <span className="ml-2 flex items-center">
-                <svg
-                  className="h-5 w-5 text-green-600 dark:text-green-300"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <span className="ml-1">Certificado Válido</span>
-              </span>
-            )}
+            {certExpiration ? (
+              isCertExpired ? (
+                <span className="ml-2 flex items-center">
+                  <svg
+                    className="h-5 w-5 text-red-600 dark:text-red-300"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M4.293 4.293a1 1 0 011.414 0L12 10.586l6.293-6.293a1 1 0 111.414 1.414L13.414 12l6.293 6.293a1 1 0 01-1.414 1.414L12 13.414l-6.293 6.293a1 1 0 01-1.414-1.414z"
+                    />
+                  </svg>
+                  <span className="ml-1">Certificado Expirado</span>
+                </span>
+              ) : (
+                <span className="ml-2 flex items-center">
+                  <svg
+                    className="h-5 w-5 text-green-600 dark:text-green-300"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span className="ml-1">Certificado Válido</span>
+                </span>
+              )
+            ) : null}
           </div>
         </div>
 
@@ -717,7 +756,7 @@ const FormNotas = () => {
                 />
                 <label
                   htmlFor="fileUpload"
-                  className="cursor-pointer rounded-md bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700"
+                  className="cursor-pointer rounded-md bg-[#b000ff] px-5 py-2 text-white transition hover:bg-[#690099]"
                 >
                   Selecionar Arquivo
                 </label>
@@ -744,11 +783,11 @@ const FormNotas = () => {
           </>
         )}
       </div>
-      {/* ----> CERTIFICADO DIGITAL <---- */}
+      {/* ----> CERTIFICADO DIGITA FIML <---- */}
 
-      {/* FORMULARIO */}
+      {/* FORMULARIO INICIO */}
 
-      <div className="flex h-[70vh] mb-18 flex-col p-6 bg-white rounded-md shadow-xl">
+      <div className="mb-18 flex h-[70vh] flex-col rounded-md bg-white p-6 shadow-xl">
         <div className="flex h-[10vh] flex-col ">
           <p className="text-SM w-fit rounded-md bg-[#b000ff] p-4 text-white">
             <b>Formulário Emitir NFS-e:</b>
@@ -793,7 +832,7 @@ const FormNotas = () => {
                   <button
                     type="button"
                     onClick={handleSearchClick}
-                    className="ml-2 rounded-full bg-blue-600 p-2 text-white transition hover:bg-blue-700 focus:outline-none"
+                    className="ml-2 rounded-full bg-[#b000ff] p-2 text-white transition hover:bg-[#690099] focus:outline-none"
                   >
                     <MagnifyingGlassIcon className="h-5 w-5" />
                   </button>
@@ -844,7 +883,7 @@ const FormNotas = () => {
                   <button
                     type="button"
                     onClick={handleTomadorSearchClick}
-                    className="ml-2 rounded-full bg-blue-600 p-2 text-white transition hover:bg-blue-700 focus:outline-none"
+                    className="ml-2 rounded-full bg-[#b000ff] p-2 text-white transition hover:bg-[#690099] focus:outline-none"
                   >
                     <MagnifyingGlassIcon className="h-5 w-5" />
                   </button>
@@ -876,45 +915,116 @@ const FormNotas = () => {
 
             {/* Outros campos */}
             {sections[activeTab].fields.map((field, index) => (
-              <div key={index} className="mb-4">
-                <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                  {field.label}
-                </label>
-                {field.name.startsWith("retem") ? (
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name={field.name}
-                      checked={(formDataState as any)[field.name] || false}
-                      onChange={(e) => {
-                        setFormDataState((prevState) => ({
-                          ...prevState,
-                          [field.name]: e.target.checked,
-                        }));
-                      }}
-                      className="form-checkbox h-5 w-5 text-blue-600 transition focus:ring-2 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                      {field.label}
-                    </span>
-                  </div>
-                ) : (
-                  <input
-                    name={field.name}
-                    value={(formDataState as any)[field.name] || ""}
-                    onChange={handleChange}
-                    placeholder={field.placeholder}
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                  />
-                )}
-              </div>
-            ))}
+  <div key={index} className="mb-4">
+    <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+      {field.label}
+    </label>
+
+    {field.name.startsWith("retem") ? (
+      <div className="flex items-center space-x-2">
+        {typeof (formDataState as any)[field.name] === "boolean" ? (
+          // Checkbox
+          <>
+            <input
+              type="checkbox"
+              name={field.name}
+              checked={(formDataState as any)[field.name] || false}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setFormDataState((prevState) => ({
+                  ...prevState,
+                  [field.name]: checked ? "" : false, // Troca para input se marcado
+                }));
+              }}
+              className="form-checkbox h-5 w-5 text-blue-600 transition focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+              {field.label}
+            </span>
+          </>
+        ) : (
+          // Input de texto + Botão para voltar ao checkbox
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              name={field.name}
+              value={(formDataState as any)[field.name] || ""}
+              onChange={handleChange}
+              placeholder="Insira o valor"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            />
+            {/* Botão para voltar ao checkbox */}
+            <button
+              type="button"
+              onClick={() => {
+                setFormDataState((prevState) => ({
+                  ...prevState,
+                  [field.name]: false, // Volta para checkbox
+                }));
+              }}
+              className="p-2 rounded bg-transparent text-gray-700 dark:text-white"
+            >
+<div className="flex flex-row justify-center items-center gap-2 w-[12rem] rounded-md bg-gray-200 hover:bg-purple-600 text-gray-700 hover:text-white px-3 py-1 cursor-pointer transition">
+  <ArrowPathIcon className="h-4 w-4" />
+  <p className="text-sm font-medium">Não Retém</p>
+</div>
+            </button>
+          </div>
+        )}
+      </div>
+    ) : (
+      <input
+        name={field.name}
+        value={(formDataState as any)[field.name] || ""}
+        onChange={handleChange}
+        placeholder={field.placeholder}
+        className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+      />
+    )}
+  </div>
+))}
+
+
+
           </form>
+
+          {activeTab === 0 && (
+            <div className="mt-4 flex h-[20vh] flex-row rounded-xl border-2 border-[#c0c0c0]">
+              {sociosFound ? (
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    Sócios:
+                  </h3>
+                  <ul>
+                    {sociosDisponiveis.map((socio, index) => (
+                      <li key={index} className="py-2">
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedSocios.some(
+                              (s) => s.id === socio.id,
+                            )}
+                            onChange={() => handleSocioSelection(socio)}
+                            className="form-checkbox mr-2 h-5 w-5 text-blue-600 transition focus:ring-2 focus:ring-blue-500"
+                          />
+                          {socio.Nome}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">
+                  Nenhum sócio encontrado.
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Botão para enviar dados da aba ativa */}
         <div className="mt-[-20vh] flex justify-end">
-          {activeTab === 4 && (
+          {activeTab === 3 && (
             <button
               type="button"
               className="rounded-lg bg-[#b000ff] px-6 py-2 text-white hover:bg-[#690099]"

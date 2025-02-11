@@ -242,138 +242,51 @@ const TablePrestador = () => {
   }, []);
 
   return (
-    <div className="container mx-auto overflow-x-auto p-4">
-      <h4 className="sticky top-0 z-10 mb-4 bg-white py-2 text-center text-lg font-bold shadow-sm">
-        Lista de Prestadores
-      </h4>
-      <div className="max-h-[80vh] overflow-x-auto rounded-lg border border-gray-300 bg-white shadow-md">
-        <table className="min-w-full divide-y divide-gray-300">
-          <thead className="sticky top-0 z-10 bg-gray-50">
-            <tr>
-              {[
-                "CNPJ",
-                "ID",
-                "Razão Social",
-                "Telefone",
-                "Email",
-                "Abertura",
-                "Agência",
-                "Banco",
-                "Conta",
-                "CEP",
-                "Rua",
-                "Nº",
-                "Comp.",
-                "Cidade",
-                "Bairro",
-                "UF",
-                "País",
-                "Senha Cert.",
-                "Usuário Pref.",
-                "Senha Pref.",
-                "Usuário DEISS",
-                "Senha DEISS",
-                "Regime",
-                "Natureza",
-                "Inscrição Mun.",
-                "Cód. Serv.",
-              ].map((header) => (
-                <th
-                  key={header}
-                  className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-700"
-                >
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {data.map((prestador, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.cnpj}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.idCadastro}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.razaoSocial}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.telefone}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.emailEmpresa}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.dataAbertura}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.agencia}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.banco}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.conta}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.cep}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.rua}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.numero}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.complemento}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.cidade}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.bairro}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.uf}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.paisOrigem}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.senhaCertificadoDigital}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.usuarioPrefeitura}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.senhaPrefeitura}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.usuarioDEISS}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.senhaDEISS}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.regimeTrib}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.naturezaJuridica}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.inscricaoMunicipal}
-                </td>
-                <td className="break-words px-3 py-2 text-xs text-gray-600">
-                  {prestador.codServico}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <div className="container mx-auto overflow-x-auto p-6">
+  <h4 className="sticky top-0 z-10 mb-6 bg-[#b000ff] text-white p-10 text-center text-xl font-semibold shadow-lg rounded-lg">
+    Lista de Prestadores
+  </h4>
+  <div className="max-h-[80vh] overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-lg">
+  <table className="min-w-full border border-gray-300 shadow-lg rounded-lg overflow-hidden">
+  <thead className="sticky top-0 z-10 bg-gray-200 text-gray-700">
+    <tr>
+      {[
+        "CNPJ", "ID", "Razão Social", "Telefone", "Email", "Abertura", "Agência", "Banco",
+        "Conta", "CEP", "Rua", "Nº", "Comp.", "Cidade", "Bairro", "UF", "País", "Senha Cert.",
+        "Usuário Pref.", "Senha Pref.", "Usuário DEISS", "Senha DEISS", "Regime", "Natureza",
+        "Inscrição Mun.", "Cód. Serv."
+      ].map((header) => (
+        <th
+          key={header}
+          className="px-6 py-4 text-center text-sm font-semibold uppercase tracking-wide text-gray-700 border border-gray-300 whitespace-nowrap"
+        >
+          {header}
+        </th>
+      ))}
+    </tr>
+  </thead>
+  <tbody className="divide-y divide-gray-200 bg-white">
+    {data.map((prestador, index) => (
+      <tr key={index} className="hover:bg-gray-100 transition-all duration-200">
+        {[
+          prestador.cnpj, prestador.idCadastro, prestador.razaoSocial, prestador.telefone, prestador.emailEmpresa,
+          prestador.dataAbertura, prestador.agencia, prestador.banco, prestador.conta, prestador.cep, prestador.rua,
+          prestador.numero, prestador.complemento, prestador.cidade, prestador.bairro, prestador.uf, prestador.paisOrigem,
+          prestador.senhaCertificadoDigital, prestador.usuarioPrefeitura, prestador.senhaPrefeitura, prestador.usuarioDEISS,
+          prestador.senhaDEISS, prestador.regimeTrib, prestador.naturezaJuridica, prestador.inscricaoMunicipal, prestador.codServico
+        ].map((item, idx) => (
+          <td key={idx} className="px-6 py-4 text-center text-sm text-gray-700 border border-gray-300">
+            {item}
+          </td>
+        ))}
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+  </div>
+</div>
+
   );
 };
 

@@ -99,58 +99,45 @@ const TableCodServico = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-4 overflow-x-auto">
-      <h4 className="text-lg font-bold mb-4 text-center bg-white sticky top-0 z-10 py-2 shadow-sm">
-        Lista de Códigos de Serviço
-      </h4>
-      <div className="overflow-x-auto max-h-[80vh] border border-gray-300 rounded-lg bg-white shadow-md">
-        <table className="min-w-full divide-y divide-gray-300">
-          <thead className="bg-gray-50 sticky top-0 z-10">
-            <tr>
-              {[
-                'UF',
-                'Município',
-                'Código Cidade IBGE',
-                'Código Serviço Federal',
-                'Código Serviço Municipal',
-                'Descrição',
-                'Taxa ISS',
-                'Taxa IR',
-                'Taxa PIS',
-                'Taxa COFINS',
-                'Taxa CSLL',
-                'Taxa INSS',
-              ].map((header) => (
-                <th
-                  key={header}
-                  className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wide"
-                >
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((prestador, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.uf}</td>
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.municipio}</td>
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.codigoCidadeIBGE}</td>
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.codigoServicoFederal}</td>
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.codigoServicoMunicipal}</td>
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.descricao}</td>
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.taxaISS}</td>
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.taxaIR}</td>
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.taxaPIS}</td>
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.taxaCOFINS}</td>
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.taxaCSLL}</td>
-                <td className="px-3 py-2 text-xs text-gray-600 break-words">{prestador.taxaINSS}</td>
-              </tr>
+    <div className="container mx-auto overflow-x-auto p-6">
+  <h4 className="sticky top-0 z-10 mb-6 bg-[#b000ff] text-white p-10 text-center text-xl font-semibold shadow-lg rounded-lg">
+    Lista de Códigos de Serviços
+  </h4>
+  <div className="max-h-[80vh] overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-lg">
+    <table className="min-w-full border border-gray-300 shadow-lg rounded-lg overflow-hidden">
+      <thead className="sticky top-0 z-10 bg-gray-200 text-gray-700">
+        <tr>
+          {[
+            "UF", "Município", "Código Cidade IBGE", "Código Serviço Federal", "Código Serviço Municipal", "Descrição", 
+            "Taxa ISS", "Taxa IR", "Taxa PIS", "Taxa COFINS", "Taxa CSLL", "Taxa INSS"
+          ].map((header) => (
+            <th
+              key={header}
+              className="px-6 py-4 text-center text-sm font-semibold uppercase tracking-wide text-gray-700 border border-gray-300 whitespace-nowrap"
+            >
+              {header}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-200 bg-white">
+        {data.map((prestador, index) => (
+          <tr key={index} className="hover:bg-gray-100 transition-all duration-200">
+            {[
+              prestador.uf, prestador.municipio, prestador.codigoCidadeIBGE, prestador.codigoServicoFederal, prestador.codigoServicoMunicipal, 
+              prestador.descricao, prestador.taxaISS, prestador.taxaIR, prestador.taxaPIS, prestador.taxaCOFINS, 
+              prestador.taxaCSLL, prestador.taxaINSS
+            ].map((item, idx) => (
+              <td key={idx} className="px-6 py-4 text-center text-sm text-gray-700 border border-gray-300">
+                {item}
+              </td>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
   );
 };
 

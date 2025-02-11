@@ -633,7 +633,7 @@ const FormPJ = () => {
 
               <button
                 type="button"
-                className=" rounded-lg border-2 border-black	 bg-cyan-700 px-16  text-white hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-700 focus:ring-offset-2"
+                className=" rounded-lg border-2 border-black	 bg-[#b000ff] px-16  text-white hover:bg-[#690099] focus:outline-none focus:ring-2 focus:ring-cyan-700 focus:ring-offset-2"
                 onClick={() => setShowModal(true)}
               >
                 Adicionar Sócio
@@ -696,7 +696,7 @@ const FormPJ = () => {
             onClick={() => setActiveTab(index)}
             className={`w-full p-4 text-center ${
               activeTab === index
-                ? "border-b-2 border-blue-500 text-blue-500"
+                ? "border-b-2 border-[#b000ff] text-[#b000ff]"
                 : "text-gray-500"
             }`}
           >
@@ -727,7 +727,7 @@ const FormPJ = () => {
                 <button
                   type="button"
                   onClick={handleSearchClick}
-                  className="absolute right-0 mr-[2%] rounded-[1rem] bg-blue-600 px-4 py-1 text-white hover:bg-blue-700 focus:outline-none"
+                  className="absolute right-0 mr-[2%] rounded-[1rem] bg-[#b000ff] px-4 py-1 text-white hover:bg-[#690099] focus:outline-none"
                 >
                   <MagnifyingGlassIcon className="h-5 w-5" />
                 </button>
@@ -785,7 +785,7 @@ const FormPJ = () => {
                 <button
                   type="button"
                   onClick={handleServicoSearchClick}
-                  className="absolute right-0 mr-[2%] rounded-[1rem] bg-blue-600 px-4 py-1 text-white hover:bg-blue-700 focus:outline-none"
+                  className="absolute right-0 mr-[2%] rounded-[1rem] bg-[#b000ff] px-4 py-1 text-white hover:bg-[#690099] focus:outline-none"
                 >
                   <MagnifyingGlassIcon className="h-5 w-5" />
                 </button>
@@ -864,7 +864,7 @@ const FormPJ = () => {
             <button
               type="button"
               onClick={() => handleUpload(formDataState)} // Chama a função corretamente
-              className="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              className="w-full rounded-lg bg-[#b000ff] px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-[#690099] focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-[#690099] dark:focus:ring-blue-800"
             >
               Enviar Arquivo
             </button>
@@ -875,7 +875,7 @@ const FormPJ = () => {
           {uploadProgress > 0 && uploadProgress < 100 && (
             <div className="mt-4 h-2.5 w-full rounded-full bg-gray-200">
               <div
-                className="h-2.5 rounded-full bg-blue-600"
+                className="h-2.5 rounded-full bg-[#b000ff]"
                 style={{ width: `${uploadProgress}%` }}
               ></div>
             </div>
@@ -929,7 +929,7 @@ const FormPJ = () => {
           {activeTab !== sections.length - 1 && (
             <button
               type="button"
-              className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600"
+              className="rounded-lg bg-[#b000ff] px-6 py-2 text-white hover:bg-[#690099]"
               onClick={handleSubmit}
             >
               Enviar Dados da Aba
@@ -940,70 +940,57 @@ const FormPJ = () => {
 
       {/* Modal de Quadro Societário */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black">
-          <div className="w-[90%] max-w-lg rounded-lg bg-white p-6 shadow-lg">
-            <h2 className="mb-4 text-lg font-bold">Adicionar Sócio</h2>
-            <form>
-              {[
-                { label: "Nome", name: "nome", placeholder: "Nome" },
-                {
-                  label: "Registro Profissional",
-                  name: "registroProfissional",
-                  placeholder: "Registro Profissional",
-                },
-                { label: "E-mail", name: "email", placeholder: "E-mail" },
-                {
-                  label: "Telefone",
-                  name: "telefone",
-                  placeholder: "Telefone",
-                },
-                { label: "CPF", name: "cpf", placeholder: "CPF" },
-              ].map((field, index) => (
-                <div key={index} className="mb-4">
-                  <label className="mb-2 block text-sm font-medium text-black">
-                    {field.label}
-                  </label>
-                  <input
-                    name={field.name}
-                    value={
-                      formDataState.quadroSocietario.length > 0 &&
-                      formDataState.quadroSocietario[
-                        formDataState.quadroSocietario.length - 1
-                      ]
-                        ? formDataState.quadroSocietario[
-                            formDataState.quadroSocietario.length - 1
-                          ][field.name] || ""
-                        : ""
-                    }
-                    placeholder={field.placeholder}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border-[1.5px] border-gray-300 px-4 py-2"
-                  />
-                </div>
-              ))}
-
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  className="mr-2 rounded-lg bg-red-500 px-4 py-2 text-white"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  className="rounded-lg bg-green-500 px-4 py-2 text-white"
-                  onClick={() => {
-                    setShowModal(false);
-                    handleSubmit(); // Envia os dados ao salvar no modal
-                  }}
-                >
-                  Cadastrar Sócio
-                </button>
-              </div>
-            </form>
-          </div>
+  <div className="fixed inset-0 flex items-center justify-center bg-[#F2F2F2] bg-opacity-70 backdrop-blur-sm">
+  <div className="w-[90%] max-w-lg rounded-3xl bg-white p-8 shadow-2xl transition-all transform hover:scale-105">
+    <h2 className="mb-6 text-2xl font-semibold text-gray-800 text-center">Adicionar Sócio</h2>
+    <form>
+      {[
+        { label: "Nome", name: "nome", placeholder: "Digite o nome" },
+        { label: "Registro Profissional", name: "registroProfissional", placeholder: "Digite o registro profissional" },
+        { label: "E-mail", name: "email", placeholder: "Digite o e-mail" },
+        { label: "Telefone", name: "telefone", placeholder: "Digite o telefone" },
+        { label: "CPF", name: "cpf", placeholder: "Digite o CPF" },
+      ].map((field, index) => (
+        <div key={index} className="mb-6">
+          <label className="mb-2 block text-sm font-medium text-gray-700">{field.label}</label>
+          <input
+            name={field.name}
+            value={
+              formDataState.quadroSocietario.length > 0 &&
+              formDataState.quadroSocietario[formDataState.quadroSocietario.length - 1]
+                ? formDataState.quadroSocietario[formDataState.quadroSocietario.length - 1][field.name] || ""
+                : ""
+            }
+            placeholder={field.placeholder}
+            onChange={handleChange}
+            className="w-full rounded-lg border-2 border-gray-300 px-5 py-3 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-400 transition-all ease-in-out"
+          />
         </div>
+      ))}
+
+      <div className="flex justify-between mt-8">
+        <button
+          type="button"
+          className="w-1/3 rounded-lg bg-red-500 px-6 py-3 text-white font-medium shadow-lg transition-all hover:bg-red-600 transform hover:scale-105"
+          onClick={() => setShowModal(false)}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          className="w-1/3 rounded-lg bg-green-500 px-6 py-3 text-white font-medium shadow-lg transition-all hover:bg-green-600 transform hover:scale-105"
+          onClick={() => {
+            setShowModal(false);
+            handleSubmit();
+          }}
+        >
+          Cadastrar Sócio
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
       )}
     </div>
   );

@@ -136,6 +136,7 @@ const TableNotas = () => {
     pdfUrl: string;
     xmlUrl: string;
     companyId: string;
+    number: string;
   }
 
   interface Empresa {
@@ -325,6 +326,7 @@ const TableNotas = () => {
               <tr>
                 {[
                   "Data",
+                  "Número da NFS-e",
                   "Prestador",
                   "CNPJ Prestador",
                   "Tomador",
@@ -350,6 +352,9 @@ const TableNotas = () => {
                       {nota.issuedOn
                         ? new Date(nota.issuedOn).toLocaleDateString()
                         : ""}
+                    </td>
+                    <td className="px-6 py-4">
+                      {nota.number}
                     </td>
                     <td className="px-6 py-4">
                       {nota.provider ? nota.provider.name : ""}
