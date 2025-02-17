@@ -14,7 +14,6 @@
     "@heroicons/react": "^2.2.0",
     "@material-tailwind/react": "^2.1.10",
     "@mona-health/react-input-mask": "^3.0.3",
-    "@react-br-forms/cpf-cnpj-mask": "^1.0.6",
     "@types/react-input-mask": "^3.0.6",
     "apexcharts": "^4.4.0",
     "buffer": "^6.0.3",
