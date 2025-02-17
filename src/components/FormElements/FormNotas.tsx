@@ -355,7 +355,7 @@ const handleSubmit = async (e?: React.FormEvent) => {
   const dadosNota = {
   ...formDataState,
   codServico: codigosServicoFormatados, // Array formatado de códigos de serviço
-  descricao: formattedDescription, // Descrição gerada
+  descricao: editableDescription, // Descrição gerada
   valor: formDataState.valor, // Valor do serviço
   retemISS: formDataState.retemISS, // Percentual de ISS Retido
   retemIR: formDataState.retemIR, // Percentual de IR Retido
@@ -479,20 +479,23 @@ const handleSubmit = async (e?: React.FormEvent) => {
     setEditableSocios(updatedSocios);
   };
 
+  const [editableDescription, setEditableDescription] = useState("");
+
   const formatDescription = () => {
     const formatted = editableSocios
       .map((socio) => {
         return `Dr. ${socio.nome} CRM ${socio.registroProfissional}
-
-Dados bancários:
-Agência: ${socio.agencia}
-Conta: ${socio.conta}
-Chave Pix: ${socio.pix}`;
+  
+  Dados bancários:
+  Agência: ${socio.agencia}
+  Conta: ${socio.conta}
+  Chave Pix: ${socio.pix}`;
       })
       .join("\n\n"); // Junta os sócios com um espaço entre eles
-
-    setFormattedDescription(formatted);
+  
+    setEditableDescription(formatted); // Define o valor inicial, mas permite edição
   };
+  
 
   // Certifique-se de que você tem um estado para armazenar os dados completos dos prestadores
   const [cnpjListData, setCnpjListData] = useState<any[]>([]);
@@ -1177,11 +1180,11 @@ Chave Pix: ${socio.pix}`;
 
                   {formattedDescription && (
                     <textarea
-                      className="mt-6 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#b000ff]"
-                      rows={6}
-                      value={formattedDescription}
-                      readOnly
-                    />
+                    className="mt-6 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#b000ff]"
+                    rows={6}
+                    value={editableDescription}
+                    onChange={(e) => setEditableDescription(e.target.value)} // Permite edição
+                  />        
                   )}
                 </>
               ) : (
