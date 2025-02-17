@@ -28,7 +28,6 @@
     "next": "^15.1.4",
     "react": "^19.0.0",
     "react-apexcharts": "^1.4.1",
-    "react-cpf-cnpj-input": "^1.0.0",
     "react-dom": "^19.0.0",
     "react-input-mask": "^2.0.4"
   },
