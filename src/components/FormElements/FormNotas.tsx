@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
-import { Buffer } from "buffer";
+import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/16/solid";
 import TableNotas from "../Tables/TableNotas";
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 const FormNotas = () => {
   const [showModal, setShowModal] = useState(false); // Controla o modal de Quadro Societário
@@ -96,18 +95,16 @@ const FormNotas = () => {
   {
     /*----> Codigos para lista de serviço  <---- */
   }
-
   interface CodigoServico {
-    chaveUnica: string;
+    codigoCidadeIBGE: string;
+    codigoServicoFederal: string;
+    codigoServicoMunicipal: string;
     descricao: string;
+    municipio: string;
+    uf: string;
   }
 
-  const handleServicoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormDataState((prevState) => ({ ...prevState, [name]: value }));
-  };
   const handleServicoSearchClick = async () => {
-    // Fetch the data when the search button is clicked
     try {
       const response = await fetch(`${process.env.API_URL}/api/listarcodigos`, {
         method: "POST",
@@ -119,23 +116,40 @@ const FormNotas = () => {
       }
 
       const result = await response.json();
-      setServicoList(result.CodigosServico); // Update the servicoList state
-      setShowServicoList(true); // Show the list once the data is fetched
+      setServicoList(result.CodigosServico);
+      setShowServicoList(true);
     } catch (error) {
       console.error("Erro ao carregar os dados", error);
     }
   };
 
-  const handleServicoSelect = (service: string | CodigoServico) => {
-    const code =
-      typeof service === "string"
-        ? service
-        : `${service.chaveUnica} - ${service.descricao}`;
+  const handleServicoSelect = (service: CodigoServico) => {
+    let currentServices = formDataState.codServico;
+    const serviceKey = service.codigoServicoMunicipal;
+
+    if (
+      currentServices.some(
+        (existing) =>
+          typeof existing !== "string" &&
+          existing.codigoServicoMunicipal === serviceKey,
+      )
+    ) {
+      currentServices = currentServices.filter(
+        (existing) =>
+          typeof existing !== "string" &&
+          existing.codigoServicoMunicipal !== serviceKey,
+      );
+    } else {
+      currentServices = [...currentServices, service];
+    }
+
     setFormDataState((prevState) => ({
       ...prevState,
-      codServico: code,
+      codServico: currentServices,
     }));
   };
+
+  // Codigos para lista de serviço FIM
   {
     /*----> Codigos para lista de serviço (FIM) <---- */
   }
@@ -158,24 +172,24 @@ const FormNotas = () => {
     emailTomador: string;
     inscricaoMunicipalTomador: string;
     competencia: string;
-    codServico: string;
     valor: string;
     cargaHoraria: string;
     localServicos: string;
     corpoNota: string;
     outrasInfo: string;
-    retemISS: boolean;
-    retemIR: boolean;
-    retemPIS: boolean;
-    retemCOFINS: boolean;
-    retemINSS: boolean;
-    retemCSLL: boolean;
+    retemISS: string;
+    retemIR: string;
+    retemPIS: string;
+    retemCOFINS: string;
+    retemINSS: string;
+    retemCSLL: string;
     celularDestinatario: string;
     emailDestinatario: string;
     ccEmail: string;
     assunto: string;
     codCidade: string;
     codMunicipio: string;
+    codServico: (string | CodigoServico)[];
   }
 
   const [formDataState, setFormDataState] = useState<FormDataState>({
@@ -196,18 +210,18 @@ const FormNotas = () => {
     emailTomador: "",
     inscricaoMunicipalTomador: "",
     competencia: "",
-    codServico: "",
+    codServico: [],
     valor: "",
     cargaHoraria: "",
     localServicos: "",
     corpoNota: "",
     outrasInfo: "",
-    retemISS: false,
-    retemIR: false,
-    retemPIS: false,
-    retemCOFINS: false,
-    retemINSS: false,
-    retemCSLL: false,
+    retemISS: "",
+    retemIR: "",
+    retemPIS: "",
+    retemCOFINS: "",
+    retemINSS: "",
+    retemCSLL: "",
     celularDestinatario: "",
     emailDestinatario: "",
     ccEmail: "",
@@ -215,14 +229,35 @@ const FormNotas = () => {
     codCidade: "",
     codMunicipio: "",
   });
+
+  // Função para formatar o CNPJ
+  const formatCNPJ = (cnpj: string): string => {
+    // Remove todos os caracteres não numéricos
+    const cleanCnpj = cnpj.replace(/\D/g, "");
+
+    // Aplica a máscara
+    return cleanCnpj.replace(
+      /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+      "$1.$2.$3/$4-$5",
+    );
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
     setFormDataState((prevState) => ({
       ...prevState,
-      [name]: value, // ✅ Update the specific field in the state
+      [name]: value,
     }));
   };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormDataState((prevState) => ({
+      ...prevState,
+      [name]: formatCNPJ(value),
+    }));
+  };
+
   // ----> BUSCAR NOTA ATRAVÉS DO NOME NO NFE.IO
 
   interface Empresa {
@@ -243,10 +278,10 @@ const FormNotas = () => {
   const [isCertExpired, setIsCertExpired] = useState(false);
 
   useEffect(() => {
-    if (formDataState.razaoSocialTomador.trim() !== "") {
-      buscarNotas(formDataState.razaoSocialTomador);
+    if (formDataState.razaoSocial.trim() !== "") {
+      buscarNotas(formDataState.razaoSocial);
     }
-  }, [formDataState.razaoSocialTomador]);
+  }, [formDataState.razaoSocial]);
 
   const buscarNotas = async (razaoSocial: string) => {
     setLoading(true);
@@ -300,46 +335,95 @@ const FormNotas = () => {
     }
   };
 
-  //---->BUSCAR NOTA ATRAVÉS DO NFE.IO FIM<----
+  // -----> ENDPOINT PARA EMITIR NOTA FISCAL UTILIZANDO A API DO NFE.IO <----
+const handleSubmit = async (e?: React.FormEvent) => {
+  if (e) e.preventDefault();
 
-  const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-
-    // Criando o objeto notaData com os dados do formulário
-    const dadosNota = { ...formDataState };
-
-    try {
-      const response = await fetch(`${process.env.API_URL}/api/cadastroNotas`, {
-        method: "POST", // Ou "PUT" se for atualização
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dadosNota), // Convertendo para JSON antes de enviar
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
-      }
-
-      console.log("Nota enviada com sucesso:", dadosNota);
-
-      // Salvar CNPJ no localStorage se necessário
-      if (formDataState.cnpjPrestador) {
-        const cnpjSemBarras = formDataState.cnpjPrestador.replace(/[^\d]/g, "");
-        localStorage.setItem("cnpj", cnpjSemBarras);
-        console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
-      }
-    } catch (error) {
-      console.error("Erro ao enviar os dados:", error);
+  // Separando os dados do código de serviço de forma clara
+  const codigosServicoFormatados = formDataState.codServico.map((service) => {
+    if (typeof service !== "string") {
+      return {
+        codigoMunicipal: service.codigoServicoMunicipal,
+        codigoFederal: service.codigoServicoFederal,
+        codigoIBGE: service.codigoCidadeIBGE,
+      };
     }
-  };
+    return service;
+  });
 
-  // BUSCAR PRESTADORES
+  // Criando o objeto de dados da nota fiscal com os dados formatados
+  const dadosNota = {
+  ...formDataState,
+  codServico: codigosServicoFormatados, // Array formatado de códigos de serviço
+  descricao: formattedDescription, // Descrição gerada
+  valor: formDataState.valor, // Valor do serviço
+  retemISS: formDataState.retemISS, // Percentual de ISS Retido
+  retemIR: formDataState.retemIR, // Percentual de IR Retido
+  retemPIS: formDataState.retemPIS, // Percentual de PIS Retido
+  retemCOFINS: formDataState.retemCOFINS, // Percentual de COFINS Retido
+  retemINSS: formDataState.retemINSS, // Percentual de INSS Retido
+  retemCSLL: formDataState.retemCSLL, // Percentual de CSLL Retido
+};
 
-  const [selectedSocios, setSelectedSocios] = useState<any[]>([]);
-  const [sociosDisponiveis, setSociosDisponiveis] = useState<any[]>([]);
+
+  try {
+    const response = await fetch(`${process.env.API_URL}/api/cadastroNotas`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dadosNota), // Enviando os dados no formato correto
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
+    }
+
+    console.log("Nota enviada com sucesso:", dadosNota);
+
+    if (formDataState.cnpjPrestador) {
+      const cnpjSemBarras = formDataState.cnpjPrestador.replace(/[^\d]/g, "");
+      localStorage.setItem("cnpj", cnpjSemBarras);
+      console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
+    }
+  } catch (error) {
+    console.error("Erro ao enviar os dados:", error);
+  }
+};
+// -----> ENDPOINT PARA EMITIR NOTA FISCAL UTILIZANDO A API DO NFE.IO (FIM) <----
+
+
+  // Estado para armazenar os sócios disponíveis e os selecionados
+  interface QuadroSocietario {
+    nome: string;
+    registroProfissional: string;
+    agencia: string;
+    conta: string;
+    banco: string;
+    pix: string;
+    cpf: string;
+    [key: string]: string; // Adiciona a indexação, permitindo qualquer chave string
+  }
+
+  const [selectedSocios, setSelectedSocios] = useState<QuadroSocietario[]>([]);
+  const [sociosDisponiveis, setSociosDisponiveis] = useState<
+    QuadroSocietario[]
+  >([]);
   const [sociosFound, setSociosFound] = useState(false);
 
+  // Manipula a seleção de sócios
+  const handleSocioSelection = (socio: QuadroSocietario) => {
+    setSelectedSocios((prevSelected) => {
+      // Verifica se o sócio já está selecionado
+      if (prevSelected.some((s) => s.cpf === socio.cpf)) {
+        return prevSelected.filter((s) => s.cpf !== socio.cpf); // Remove se já estiver
+      } else {
+        return [...prevSelected, socio]; // Adiciona se não estiver
+      }
+    });
+  };
+
+  // Função para selecionar um prestador pelo CNPJ e carregar sócios
   const handleCnpjSelect = (selectedCnpj: string) => {
     const prestador = cnpjListData.find((p: any) => p.Cnpj === selectedCnpj);
 
@@ -352,34 +436,62 @@ const FormNotas = () => {
         regProfissional: prestador.EmailEmpresa || "",
       }));
 
-      // Check if there's a partner list
-      if (
-        Array.isArray(prestador.QuadroSocietario) &&
-        prestador.QuadroSocietario.length > 0
-      ) {
-        setSociosDisponiveis(prestador.QuadroSocietario);
-      } else {
-        setSociosDisponiveis([]); // Garante que não seja undefined
+      let socios: QuadroSocietario[] = [];
+
+      if (prestador.QuadroSocietario) {
+        try {
+          // Converte para array, se for uma string JSON
+          socios =
+            typeof prestador.QuadroSocietario === "string"
+              ? JSON.parse(prestador.QuadroSocietario)
+              : prestador.QuadroSocietario;
+
+          if (!Array.isArray(socios)) {
+            console.error(
+              "Erro: QuadroSocietario não é um array válido:",
+              socios,
+            );
+            socios = []; // Garante que não quebre a interface
+          }
+        } catch (error) {
+          console.error("Erro ao converter QuadroSocietario:", error);
+          socios = []; // Evita erro caso o JSON esteja corrompido
+        }
       }
+
+      setSociosDisponiveis(socios);
+      setSociosFound(socios.length > 0); // Atualiza corretamente o estado
     }
 
     setShowCnpjList(false);
   };
+  const [editableSocios, setEditableSocios] = useState(sociosDisponiveis);
+  const [formattedDescription, setFormattedDescription] = useState("");
 
-  const handleSocioSelection = (socio: any) => {
-    setSelectedSocios((prevSocios) => {
-      const isSelected = prevSocios.find((s) => s.id === socio.id);
+  // Atualiza o estado quando os sócios disponíveis mudam
+  useEffect(() => {
+    setEditableSocios(sociosDisponiveis);
+  }, [sociosDisponiveis]);
 
-      if (isSelected) {
-        return prevSocios.filter((s) => s.id !== socio.id);
-      }
+  const handleEditChange = (index: number, field: string, value: string) => {
+    const updatedSocios = [...editableSocios];
+    updatedSocios[index] = { ...updatedSocios[index], [field]: value };
+    setEditableSocios(updatedSocios);
+  };
 
-      if (prevSocios.length < 5) {
-        return [...prevSocios, socio];
-      }
+  const formatDescription = () => {
+    const formatted = editableSocios
+      .map((socio) => {
+        return `Dr. ${socio.nome} CRM ${socio.registroProfissional}
 
-      return prevSocios;
-    });
+Dados bancários:
+Agência: ${socio.agencia}
+Conta: ${socio.conta}
+Chave Pix: ${socio.pix}`;
+      })
+      .join("\n\n"); // Junta os sócios com um espaço entre eles
+
+    setFormattedDescription(formatted);
   };
 
   // Certifique-se de que você tem um estado para armazenar os dados completos dos prestadores
@@ -437,16 +549,11 @@ const FormNotas = () => {
           name: "razaoSocial",
           placeholder: "Razão Social",
         },
-        {
-          label: "Sócio",
-          name: "socio",
-          placeholder: "Sócio",
-        },
-        {
-          label: "Reg. Profissional",
-          name: "regProfissional",
-          placeholder: "Reg. Profissional",
-        },
+        // {
+        //   label: "Reg. Profissional",
+        //   name: "regProfissional",
+        //   placeholder: "Reg. Profissional",
+        // },
       ],
     },
     {
@@ -522,27 +629,27 @@ const FormNotas = () => {
           name: "valor",
           placeholder: "Valor",
         },
-        {
-          label: "Carga Horária",
-          name: "cargaHoraria",
-          placeholder: "Carga Horária",
-        },
-        {
-          label: "Local Serviços Prestados",
-          name: "localServicos",
-          placeholder: "Local Serviços Prestados",
-          extra: "",
-        },
-        {
-          label: "Corpo da Nota",
-          name: "corpoNota",
-          placeholder: "Corpo da Nota",
-        },
-        {
-          label: "Outras Informações",
-          name: "outrasInfo",
-          placeholder: "Outras Informações",
-        },
+        // {
+        //   label: "Carga Horária",
+        //   name: "cargaHoraria",
+        //   placeholder: "Carga Horária",
+        // },
+        // {
+        //   label: "Local Serviços Prestados",
+        //   name: "localServicos",
+        //   placeholder: "Local Serviços Prestados",
+        //   extra: "",
+        // },
+        // {
+        //   label: "Corpo da Nota",
+        //   name: "corpoNota",
+        //   placeholder: "Corpo da Nota",
+        // },
+        // {
+        //   label: "Outras Informações",
+        //   name: "outrasInfo",
+        //   placeholder: "Outras Informações",
+        // },
       ],
     },
     {
@@ -671,7 +778,8 @@ const FormNotas = () => {
   return (
     <div className="rounded-xl p-6">
       {/* ---->CERTIFICADO DIGITAL<---- */}
-      <div className="mb-18 rounded-lg border border-gray-300 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+      <TableNotas />
+      <div className="mt-18 rounded-lg border border-gray-300 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
         {/* Título */}
         <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
           Gerenciamento de Certificado Digital
@@ -783,11 +891,10 @@ const FormNotas = () => {
           </>
         )}
       </div>
-      {/* ----> CERTIFICADO DIGITA FIML <---- */}
+      {/* ----> CERTIFICADO DIGITA FIM <---- */}
 
       {/* FORMULARIO INICIO */}
-
-      <div className="mb-18 flex h-[70vh] flex-col rounded-md bg-white p-6 shadow-xl">
+      <div className="mt-18 flex h-[85vh] flex-col rounded-md border border-gray-300 bg-white p-6 shadow-xl">
         <div className="flex h-[10vh] flex-col ">
           <p className="text-SM w-fit rounded-md bg-[#b000ff] p-4 text-white">
             <b>Formulário Emitir NFS-e:</b>
@@ -828,6 +935,8 @@ const FormNotas = () => {
                     onChange={handleChange}
                     placeholder="CNPJ da empresa"
                     className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    maxLength={18} // Comprimento máximo do CNPJ formatado
+                    onBlur={handleBlur}
                   />
                   <button
                     type="button"
@@ -879,6 +988,7 @@ const FormNotas = () => {
                     onChange={handleChange}
                     placeholder="CNPJ do Tomador"
                     className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    maxLength={18} // Comprimento máximo do CNPJ formatado
                   />
                   <button
                     type="button"
@@ -915,115 +1025,266 @@ const FormNotas = () => {
 
             {/* Outros campos */}
             {sections[activeTab].fields.map((field, index) => (
-  <div key={index} className="mb-4">
-    <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-      {field.label}
-    </label>
+              <div key={index} className="mb-4">
+                <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                  {field.label}
+                </label>
 
-    {field.name.startsWith("retem") ? (
-      <div className="flex items-center space-x-2">
-        {typeof (formDataState as any)[field.name] === "boolean" ? (
-          // Checkbox
-          <>
-            <input
-              type="checkbox"
-              name={field.name}
-              checked={(formDataState as any)[field.name] || false}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                setFormDataState((prevState) => ({
-                  ...prevState,
-                  [field.name]: checked ? "" : false, // Troca para input se marcado
-                }));
-              }}
-              className="form-checkbox h-5 w-5 text-blue-600 transition focus:ring-2 focus:ring-blue-500"
-            />
-            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-              {field.label}
-            </span>
-          </>
-        ) : (
-          // Input de texto + Botão para voltar ao checkbox
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              name={field.name}
-              value={(formDataState as any)[field.name] || ""}
-              onChange={handleChange}
-              placeholder="Insira o valor"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-            />
-            {/* Botão para voltar ao checkbox */}
-            <button
-              type="button"
-              onClick={() => {
-                setFormDataState((prevState) => ({
-                  ...prevState,
-                  [field.name]: false, // Volta para checkbox
-                }));
-              }}
-              className="p-2 rounded bg-transparent text-gray-700 dark:text-white"
-            >
-<div className="flex flex-row justify-center items-center gap-2 w-[12rem] rounded-md bg-gray-200 hover:bg-purple-600 text-gray-700 hover:text-white px-3 py-1 cursor-pointer transition">
-  <ArrowPathIcon className="h-4 w-4" />
-  <p className="text-sm font-medium">Não Retém</p>
-</div>
-            </button>
-          </div>
-        )}
-      </div>
-    ) : (
-      <input
-        name={field.name}
-        value={(formDataState as any)[field.name] || ""}
-        onChange={handleChange}
-        placeholder={field.placeholder}
-        className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-      />
-    )}
-  </div>
-))}
-
-
-
+                {field.name.startsWith("retem") ? (
+                  <div className="flex items-center space-x-2">
+                    {typeof (formDataState as any)[field.name] === "boolean" ? (
+                      // Checkbox
+                      <>
+                        <input
+                          type="checkbox"
+                          name={field.name}
+                          checked={(formDataState as any)[field.name] || false}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setFormDataState((prevState) => ({
+                              ...prevState,
+                              [field.name]: checked ? "" : false, // Troca para input se marcado
+                            }));
+                          }}
+                          className="form-checkbox h-5 w-5 text-blue-600 transition focus:ring-2 focus:ring-blue-500"
+                        />
+                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                          {field.label}
+                        </span>
+                      </>
+                    ) : (
+                      // Input de texto + Botão para voltar ao checkbox
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          name={field.name}
+                          value={(formDataState as any)[field.name] || ""}
+                          onChange={handleChange}
+                          placeholder="Insira a %"
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        />
+                        {/* Botão para voltar ao checkbox */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormDataState((prevState) => ({
+                              ...prevState,
+                              [field.name]: false, // Volta para checkbox
+                            }));
+                          }}
+                          className="rounded bg-transparent p-2 text-gray-700 dark:text-white"
+                        >
+                          <div className="flex w-[12rem] cursor-pointer flex-row items-center justify-center gap-2 rounded-md bg-gray-200 px-3 py-1 text-gray-700 transition hover:bg-purple-600 hover:text-white">
+                            <ArrowPathIcon className="h-4 w-4" />
+                            <p className="text-sm font-medium">Não Retém</p>
+                          </div>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <input
+                    name={field.name}
+                    value={(formDataState as any)[field.name] || ""}
+                    onChange={handleChange}
+                    placeholder={field.placeholder}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                  />
+                )}
+              </div>
+            ))}
           </form>
 
+          {/* QUADRO DE SÓCIOS */}
           {activeTab === 0 && (
-            <div className="mt-4 flex h-[20vh] flex-row rounded-xl border-2 border-[#c0c0c0]">
-              {sociosFound ? (
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    Sócios:
-                  </h3>
-                  <ul>
-                    {sociosDisponiveis.map((socio, index) => (
-                      <li key={index} className="py-2">
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={selectedSocios.some(
-                              (s) => s.id === socio.id,
-                            )}
-                            onChange={() => handleSocioSelection(socio)}
-                            className="form-checkbox mr-2 h-5 w-5 text-blue-600 transition focus:ring-2 focus:ring-blue-500"
-                          />
-                          {socio.Nome}
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+            <div className="mt-24 rounded-2xl border border-[#b000ff] bg-white p-6 shadow-2xl">
+              {editableSocios.length > 0 ? (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          {[
+                            "Nome",
+                            "CRM",
+                            "Agência",
+                            "Conta",
+                            "PIX",
+                            "Selecionar",
+                          ].map((header, i) => (
+                            <th
+                              key={i}
+                              className="border-b border-[#b000ff] px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                            >
+                              {header}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {editableSocios.map((socio, index) => (
+                          <tr
+                            key={index}
+                            className="transition-colors duration-150 ease-in-out hover:bg-gray-100"
+                          >
+                            {[
+                              "nome",
+                              "registroProfissional",
+                              "agencia",
+                              "conta",
+                              "pix",
+                            ].map((field) => (
+                              <td
+                                key={field}
+                                className="whitespace-nowrap border-b px-6 py-4"
+                              >
+                                <input
+                                  type="text"
+                                  value={socio[field] || ""}
+                                  onChange={(e) =>
+                                    handleEditChange(
+                                      index,
+                                      field,
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="w-full rounded-lg border border-gray-300 p-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#b000ff]"
+                                />
+                              </td>
+                            ))}
+                            <td className="whitespace-nowrap border-b px-6 py-4 text-center">
+                              <input
+                                type="checkbox"
+                                checked={selectedSocios.some(
+                                  (s) => s.cpf === socio.cpf,
+                                )}
+                                onChange={() => handleSocioSelection(socio)}
+                                className="form-checkbox h-5 w-5 text-[#b000ff] transition duration-150 ease-in-out"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <button
+                    onClick={formatDescription}
+                    className="mt-6 rounded-lg bg-[#b000ff] px-6 py-3 text-white shadow-lg transition duration-200 ease-in-out hover:bg-[#9f00e1] focus:outline-none focus:ring-2 focus:ring-[#b000ff]"
+                  >
+                    Gerar Descrição NFE-e
+                  </button>
+
+                  {formattedDescription && (
+                    <textarea
+                      className="mt-6 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#b000ff]"
+                      rows={6}
+                      value={formattedDescription}
+                      readOnly
+                    />
+                  )}
+                </>
               ) : (
-                <p className="text-sm text-gray-500">
+                <p className="text-center text-gray-600">
                   Nenhum sócio encontrado.
                 </p>
+              )}
+            </div>
+          )}
+          {/* QUADRO DE SÓCIOS FIM */}
+
+          {/* Campo para Procura dos códigos de serviços */}
+          {activeTab === 2 && (
+            <div className="mt-14 flex flex-col rounded-lg border border-gray-300 bg-white p-4 shadow-md">
+              {/* Botão para buscar códigos */}
+              <button
+                type="button"
+                onClick={handleServicoSearchClick}
+                className="flex items-center justify-between rounded-lg bg-purple-600 p-3 font-semibold text-[#F2F2F2] shadow-sm transition-all hover:bg-purple-700"
+              >
+                <span>Códigos de Serviço</span>
+                <MagnifyingGlassIcon className="h-5 w-5" />
+              </button>
+
+              {/* Lista de serviços */}
+              {showServicoList && (
+                <ul
+                  ref={servicoListRef}
+                  className="z-20 mt-4 max-h-[50vh] overflow-auto rounded-lg border border-gray-300 bg-white shadow-lg"
+                >
+                  {servicoList.length > 0 ? (
+                    servicoList.map((codServico, index) => (
+                      <li key={index} className="cursor-pointer px-4 py-2">
+                        <label className="flex flex-row items-center justify-between rounded-lg bg-white p-3 text-xs">
+                          <div className="grid w-full grid-cols-5 divide-x divide-gray-200 text-center">
+                            <div className="flex flex-col items-center px-2 py-1">
+                              <span className="text-[11px] font-semibold text-gray-700">
+                                Cód. Municipal
+                              </span>
+                              <span className="text-[10px] text-gray-600">
+                                {codServico.codigoServicoMunicipal}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center px-2 py-1">
+                              <span className="text-[11px] font-semibold text-gray-700">
+                                Serviço
+                              </span>
+                              <span className="w-full truncate text-[10px] text-gray-600">
+                                {codServico.descricao}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center px-2 py-1">
+                              <span className="text-[11px] font-semibold text-gray-700">
+                                Município
+                              </span>
+                              <span className="text-[10px] text-gray-600">
+                                {codServico.municipio} - {codServico.uf}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center px-2 py-1">
+                              <span className="text-[11px] font-semibold text-gray-700">
+                                Cód. IBGE
+                              </span>
+                              <span className="text-[10px] text-gray-600">
+                                {codServico.codigoCidadeIBGE}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center px-2 py-1">
+                              <span className="text-[11px] font-semibold text-gray-700">
+                                Cód. Federal
+                              </span>
+                              <span className="text-[10px] text-gray-600">
+                                {codServico.codigoServicoFederal}
+                              </span>
+                            </div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={formDataState.codServico.some(
+                              (service) =>
+                                typeof service !== "string" &&
+                                service.codigoServicoMunicipal ===
+                                  codServico.codigoServicoMunicipal,
+                            )}
+                            onChange={() => handleServicoSelect(codServico)}
+                            className="ml-3 h-4 w-4 rounded border-gray-300 text-yellow-500 focus:ring-yellow-500"
+                          />
+                        </label>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-4 py-2 text-center text-gray-500">
+                      Nenhum Código de Serviço encontrado
+                    </li>
+                  )}
+                </ul>
               )}
             </div>
           )}
         </div>
 
         {/* Botão para enviar dados da aba ativa */}
-        <div className="mt-[-20vh] flex justify-end">
+        <div className="mr-24 flex justify-end">
           {activeTab === 3 && (
             <button
               type="button"
@@ -1035,7 +1296,6 @@ const FormNotas = () => {
           )}
         </div>
       </div>
-      <TableNotas />
     </div>
   );
 };

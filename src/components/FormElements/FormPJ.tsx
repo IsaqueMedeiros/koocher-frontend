@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
 import { Buffer } from "buffer";
+import { CloudArrowUpIcon, LockClosedIcon } from "@heroicons/react/24/solid";
+
 
 const FormPJ = () => {
   const [showModal, setShowModal] = useState(false); // Controla o modal de Quadro Societário
@@ -37,13 +39,13 @@ const FormPJ = () => {
 
   const handleUpload = async (formDataState: FormDataState) => {
     if (!selectedFile) {
-        alert("Por favor, selecione um arquivo primeiro.");
-        return;
+      alert("Por favor, selecione um arquivo primeiro.");
+      return;
     }
 
     if (!password) {
-        alert("Por favor, insira a senha do certificado digital.");
-        return;
+      alert("Por favor, insira a senha do certificado digital.");
+      return;
     }
 
     const formData = new FormData();
@@ -53,52 +55,52 @@ const FormPJ = () => {
     const codServicoJson = JSON.stringify(formDataState.codServico);
     // Mapeando os dados do formulário para o objeto companyData
     const companyData = {
-        federalTaxNumber: formDataState.Cnpj || '33986596000108', // Use o CNPJ fornecido
-        name: formDataState.razaoSocial || 'Isaque', // Use a razão social fornecida
-        tradeName: formDataState.razaoSocial || 'Boutique', // Supondo que você tenha um campo para nome fantasia
-        municipalTaxNumber: formDataState.inscricaoMunicipal || '12345', // Use a inscrição municipal fornecida
-        taxRegime: formDataState.regimeTrib || 'SimplesNacional', // Use o regime tributário fornecido
-        specialTaxRegime: 'Nenhum', // Mantém como fictício ou faça um mapeamento
-        address: {
-            country: formDataState.paisOrigem || 'BRA', // Use o país de origem
-            postalCode: formDataState.cep || '12345678', // Use o CEP fornecido
-            street: formDataState.rua || 'Desembargador Amílcar', // Use a rua fornecida
-            number: formDataState.numero || '123', // Use o número fornecido
-            additionalInformation: formDataState.complemento || 'Sala 1', // Use o complemento fornecido
-            district: formDataState.bairro || 'Bairro Exemplo', // Use o bairro fornecido
-            city: {
-                code: formDataState.codIBGE || '3550308', // Use o código IBGE ou um valor fictício
-                name: formDataState.cidade || 'São Paulo', // Use a cidade fornecida
-            },
-            state: formDataState.uf || 'SP', // Use o estado fornecido
+      federalTaxNumber: formDataState.Cnpj || "33986596000108", // Use o CNPJ fornecido
+      name: formDataState.razaoSocial || "Isaque", // Use a razão social fornecida
+      tradeName: formDataState.razaoSocial || "Boutique", // Supondo que você tenha um campo para nome fantasia
+      municipalTaxNumber: formDataState.inscricaoMunicipal || "12345", // Use a inscrição municipal fornecida
+      taxRegime: formDataState.regimeTrib || "SimplesNacional", // Use o regime tributário fornecido
+      specialTaxRegime: "Nenhum", // Mantém como fictício ou faça um mapeamento
+      address: {
+        country: formDataState.paisOrigem || "BRA", // Use o país de origem
+        postalCode: formDataState.cep || "12345678", // Use o CEP fornecido
+        street: formDataState.rua || "Desembargador Amílcar", // Use a rua fornecida
+        number: formDataState.numero || "123", // Use o número fornecido
+        additionalInformation: formDataState.complemento || "Sala 1", // Use o complemento fornecido
+        district: formDataState.bairro || "Bairro Exemplo", // Use o bairro fornecido
+        city: {
+          code: formDataState.codIBGE || "3550308", // Use o código IBGE ou um valor fictício
+          name: formDataState.cidade || "São Paulo", // Use a cidade fornecida
         },
-        email: formDataState.emailEmpresa || 'email@empresa.com', // Use o email fornecido
-        openningDate: formDataState.dataAbertura || '2025-01-28T15:00:08.326Z', // Use a data de abertura fornecida
-        legalNature: formDataState.naturezaJuridica || 'EmpresaPublica', // Use a natureza jurídica fornecida
-        economicActivities: [
-            {
-                type: 'Main',
-                code: '0',
-            }
-        ],
-        companyRegistryNumber: formDataState.Cnpj || '33986596000108', // Use o CNPJ fornecido
-        regionalTaxNumber: '0', // Mantém como fictício
-        rpsSerialNumber: codServicoJson || 'ABC', // Use o código do serviço ou um valor fictício
-        rpsNumber: '1', // Mantém como fictício
-        issRate: '5', // Mantém como fictício
-        environment: 'Development', // Mantém como fictício
-        fiscalStatus: 'CityNotSupported', // Mantém como fictício
-        federalTaxDetermination: 'NotInformed', // Mantém como fictício
-        municipalTaxDetermination: 'NotInformed', // Mantém como fictício
-        loginName: formDataState.usuarioPrefeitura || 'login', // Use o nome de usuário da prefeitura fornecido
-        loginPassword: formDataState.senhaPrefeitura || '024', // Use a senha da prefeitura fornecida
-        authIssueValue: '500', // Mantém como fictício
-        certificate: {
-            thumbprint: 'string', // Mantém como fictício
-            modifiedOn: '2025-01-28T15:00:08.326Z', // Mantém como fictício
-            expiresOn: '2025-01-28T15:00:08.326Z', // Mantém como fictício
-            status: 'Overdue', // Mantém como fictício
-        }
+        state: formDataState.uf || "SP", // Use o estado fornecido
+      },
+      email: formDataState.emailEmpresa || "email@empresa.com", // Use o email fornecido
+      openningDate: formDataState.dataAbertura || "2025-01-28T15:00:08.326Z", // Use a data de abertura fornecida
+      legalNature: formDataState.naturezaJuridica || "EmpresaPublica", // Use a natureza jurídica fornecida
+      economicActivities: [
+        {
+          type: "Main",
+          code: "0",
+        },
+      ],
+      companyRegistryNumber: formDataState.Cnpj || "33986596000108", // Use o CNPJ fornecido
+      regionalTaxNumber: "0", // Mantém como fictício
+      rpsSerialNumber: codServicoJson || "ABC", // Use o código do serviço ou um valor fictício
+      rpsNumber: "1", // Mantém como fictício
+      issRate: "5", // Mantém como fictício
+      environment: "Development", // Mantém como fictício
+      fiscalStatus: "CityNotSupported", // Mantém como fictício
+      federalTaxDetermination: "NotInformed", // Mantém como fictício
+      municipalTaxDetermination: "NotInformed", // Mantém como fictício
+      loginName: formDataState.usuarioPrefeitura || "login", // Use o nome de usuário da prefeitura fornecido
+      loginPassword: formDataState.senhaPrefeitura || "024", // Use a senha da prefeitura fornecida
+      authIssueValue: "500", // Mantém como fictício
+      certificate: {
+        thumbprint: "string", // Mantém como fictício
+        modifiedOn: "2025-01-28T15:00:08.326Z", // Mantém como fictício
+        expiresOn: "2025-01-28T15:00:08.326Z", // Mantém como fictício
+        status: "Overdue", // Mantém como fictício
+      },
     };
 
     // Convertendo o objeto companyData para string JSON
@@ -108,29 +110,25 @@ const FormPJ = () => {
     const cnpj = localStorage.getItem("cnpj");
 
     try {
-        const response = await fetch(
-            `${process.env.API_URL}/api/salvarcertificados?cnpj=${encodeURIComponent(cnpj || formDataState.Cnpj)}`,
-            {
-                method: "POST",
-                body: formData,
-            }
-        );
+      const response = await fetch(
+        `${process.env.API_URL}/api/salvarcertificados?cnpj=${encodeURIComponent(cnpj || formDataState.Cnpj)}`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
-        if (response.ok) {
-            alert("Upload concluído com sucesso!");
-        } else {
-            const errorText = await response.text();
-            alert(`Erro no upload: ${errorText}`);
-        }
+      if (response.ok) {
+        alert("Upload concluído com sucesso!");
+      } else {
+        const errorText = await response.text();
+        alert(`Erro no upload: ${errorText}`);
+      }
     } catch (error) {
-        console.error("Erro no upload:", error);
-        alert("Erro no upload. Por favor, tente novamente.");
+      console.error("Erro no upload:", error);
+      alert("Erro no upload. Por favor, tente novamente.");
     }
-};
-
-
-
-  
+  };
 
   // API LIST CEP COMPLETO
 
@@ -159,19 +157,21 @@ const FormPJ = () => {
     }
   };
 
-  // Codigos para lista de serviço
-
   interface CodigoServico {
-    chaveUnica: string;
+    codigoCidadeIBGE: string;
+    codigoServicoFederal: string;
+    codigoServicoMunicipal: string;
     descricao: string;
+    municipio: string;
+    uf: string;
   }
 
   const handleServicoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormDataState((prevState) => ({ ...prevState, [name]: value }));
   };
+
   const handleServicoSearchClick = async () => {
-    // Fetch the data when the search button is clicked
     try {
       const response = await fetch(`${process.env.API_URL}/api/listarcodigos`, {
         method: "POST",
@@ -183,33 +183,30 @@ const FormPJ = () => {
       }
 
       const result = await response.json();
-      setServicoList(result.CodigosServico); // Update the servicoList state
-      setShowServicoList(true); // Show the list once the data is fetched
+      setServicoList(result.CodigosServico);
+      setShowServicoList(true);
     } catch (error) {
       console.error("Erro ao carregar os dados", error);
     }
   };
 
-  const handleServicoSelect = (service: string | CodigoServico) => {
+  const handleServicoSelect = (service: CodigoServico) => {
     let currentServices = formDataState.codServico;
-    const serviceKey =
-      typeof service === "string" ? service : service.chaveUnica;
+    const serviceKey = service.codigoServicoMunicipal;
 
     if (
-      currentServices.some((existing) => {
-        const existingKey =
-          typeof existing === "string" ? existing : existing.chaveUnica;
-        return existingKey === serviceKey;
-      })
+      currentServices.some(
+        (existing) =>
+          typeof existing !== "string" &&
+          existing.codigoServicoMunicipal === serviceKey,
+      )
     ) {
-      // If service exists in the array, remove it
-      currentServices = currentServices.filter((existing) => {
-        const existingKey =
-          typeof existing === "string" ? existing : existing.chaveUnica;
-        return existingKey !== serviceKey;
-      });
+      currentServices = currentServices.filter(
+        (existing) =>
+          typeof existing !== "string" &&
+          existing.codigoServicoMunicipal !== serviceKey,
+      );
     } else {
-      // If it doesn't exist, add it
       currentServices = [...currentServices, service];
     }
 
@@ -218,13 +215,16 @@ const FormPJ = () => {
       codServico: currentServices,
     }));
   };
+
   // Codigos para lista de serviço FIM
 
   interface QuadroSocietario {
     nome: string;
     registroProfissional: string;
-    email: string;
-    telefone: string;
+    agencia: string;
+    conta: string;
+    banco: string;
+    pix: string;
     cpf: string;
     [key: string]: string; // Adiciona a indexação, permitindo qualquer chave string
   }
@@ -258,7 +258,7 @@ const FormPJ = () => {
     status: string;
     quadroSocietario: QuadroSocietario[];
     codServico: (string | CodigoServico)[];
-    codIBGE: string,
+    codIBGE: string;
   }
 
   const [formDataState, setFormDataState] = useState<FormDataState>({
@@ -296,10 +296,10 @@ const FormPJ = () => {
     const { name, value } = e.target;
 
     // Verifica se o campo alterado é o CNPJ
-    if (name === 'Cnpj') {
-      console.log('Valor do CNPJ antes de salvar:', value); // Debug
-      localStorage.setItem('cnpj', value);
-      console.log('CNPJ salvo no localStorage');
+    if (name === "Cnpj") {
+      console.log("Valor do CNPJ antes de salvar:", value); // Debug
+      localStorage.setItem("cnpj", value);
+      console.log("CNPJ salvo no localStorage");
     }
 
     setFormDataState((prevState) => {
@@ -337,8 +337,10 @@ const FormPJ = () => {
         newSocios.push({
           nome: "",
           registroProfissional: "",
-          email: "",
-          telefone: "",
+          agencia: "",
+          conta: "",
+          banco: "",
+          pix: "",
           cpf: "",
         });
       }
@@ -390,54 +392,44 @@ const FormPJ = () => {
 
   const handleCnpjSelect = (selectedCnpj: string) => {
     const prestador = cnpjListData.find((p: any) => p.Cnpj === selectedCnpj);
-
+  
     if (prestador) {
       const expectedKeys = [
         "nome",
         "registroProfissional",
-        "email",
-        "telefone",
-        "cpf",
+        "agencia",
+        "conta",
+        "banco",
+        "pix",
+        "cpf"
       ];
-
-      let quadroSocietario: QuadroSocietario[];
-
+  
+      let quadroSocietario: QuadroSocietario[] = [];
+  
       if (prestador.QuadroSocietario) {
         try {
+          // Verifica se é uma string e faz o parsing para JSON
           const parsedQuadroSocietario =
             typeof prestador.QuadroSocietario === "string"
               ? JSON.parse(prestador.QuadroSocietario)
               : prestador.QuadroSocietario;
-
-          // Parte do handleCnpjSelect
-          // Processando quadroSocietario
+  
           if (Array.isArray(parsedQuadroSocietario)) {
-            quadroSocietario = parsedQuadroSocietario.filter((socio) => {
-              // Verifique se todos os campos necessários têm valores válidos
-              return expectedKeys.every(
-                (key) => socio[key] && socio[key] !== "N/A",
-              );
-            });
+            quadroSocietario = parsedQuadroSocietario.filter((socio) =>
+              expectedKeys.every((key) => socio[key] && socio[key] !== "N/A")
+            );
           } else if (typeof parsedQuadroSocietario === "object") {
-            quadroSocietario = [parsedQuadroSocietario].filter((socio) => {
-              // Verifique se todos os campos necessários têm valores válidos
-              return expectedKeys.every(
-                (key) => socio[key] && socio[key] !== "N/A",
-              );
-            });
-          } else {
-            // Caso nenhum dos casos acima se aplique, inicializamos um array vazio
-            quadroSocietario = [];
+            quadroSocietario = [parsedQuadroSocietario].filter((socio) =>
+              expectedKeys.every((key) => socio[key] && socio[key] !== "N/A")
+            );
           }
         } catch (error) {
           console.error("Erro ao processar QuadroSocietario:", error);
-          quadroSocietario = []; // Em caso de erro, inicializamos um array vazio
         }
-      } else {
-        // Se não houver QuadroSocietario, inicializamos com um array vazio
-        quadroSocietario = [];
       }
-
+  
+      console.log("Quadro Societário processado:", quadroSocietario); // Debug para verificar se os dados estão corretos
+  
       setFormDataState((prevState) => ({
         ...prevState,
         IdCadastro: prestador.idCadastro || "",
@@ -452,12 +444,13 @@ const FormPJ = () => {
         agencia: prestador.Agencia || "",
         banco: prestador.Banco || "",
         conta: prestador.Conta || "",
-        quadroSocietario: quadroSocietario,
+        quadroSocietario, // Atualiza corretamente o quadro societário
       }));
     }
-
+  
     setShowCnpjList(false);
   };
+  
 
   // Certifique-se de que você tem um estado para armazenar os dados completos dos prestadores
   const [cnpjListData, setCnpjListData] = useState<any[]>([]);
@@ -503,9 +496,11 @@ const FormPJ = () => {
   const expectedKeys = [
     "nome",
     "registroProfissional",
-    "email",
-    "telefone",
-    "cpf",
+    "agencia",
+    "conta",
+    "banco",
+    "pix",
+    "cpf"
   ];
 
   const sections = [
@@ -566,7 +561,11 @@ const FormPJ = () => {
           placeholder: "Complemento",
         },
         { label: "Cidade", name: "cidade", placeholder: "Cidade" },
-        { label: "Código da cidade IBGE", name: "codIBGE", placeholder: "Código da cidade IBGE" },
+        {
+          label: "Código da cidade IBGE",
+          name: "codIBGE",
+          placeholder: "Código da cidade IBGE",
+        },
         { label: "Bairro", name: "bairro", placeholder: "Bairro" },
         { label: "UF", name: "uf", placeholder: "UF" },
         {
@@ -704,7 +703,7 @@ const FormPJ = () => {
           </button>
         ))}
       </div>
-      <div style={{ minHeight: "400px" }}>
+      <div style={{ minHeight: "600px" }}>
         <form className="grid w-full grid-cols-2 gap-4 sm:grid-cols-2">
           {/* Campo CNPJ */}
           {activeTab === 0 && (
@@ -756,150 +755,6 @@ const FormPJ = () => {
               )}
             </div>
           )}
-          {/* Campo para Procura dos códigos de serviços */}
-
-          {activeTab === 3 && ( // Check if the active tab is "Fiscal" (index 3)
-            <div className="mb-4 flex flex-col">
-              <label
-                htmlFor="codServico"
-                className="mb-2 text-sm font-medium text-gray-700"
-              >
-                Código Serviço
-              </label>
-              <div className="relative flex w-full items-center">
-                <input
-                  type="text"
-                  name="codServico"
-                  value={formDataState.codServico
-                    .map((service) =>
-                      typeof service === "string"
-                        ? service
-                        : `${service.chaveUnica} - ${service.descricao}`,
-                    )
-                    .join(", ")}
-                  onChange={handleServicoChange}
-                  placeholder="Digite o Código do Serviço"
-                  className="w-full rounded border p-2"
-                />
-
-                <button
-                  type="button"
-                  onClick={handleServicoSearchClick}
-                  className="absolute right-0 mr-[2%] rounded-[1rem] bg-[#b000ff] px-4 py-1 text-white hover:bg-[#690099] focus:outline-none"
-                >
-                  <MagnifyingGlassIcon className="h-5 w-5" />
-                </button>
-              </div>
-              {showServicoList && (
-                <ul
-                  ref={servicoListRef}
-                  className="absolute z-10 ml-[46%] mt-[-5rem] w-[40%] rounded-md border border-gray-300 bg-white shadow-lg"
-                >
-                  {servicoList.length > 0 ? (
-                    servicoList.map((codServico, index) => (
-                      <li
-                        key={index}
-                        className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-                      >
-                        <label>
-                          <input
-                            type="checkbox"
-                            checked={formDataState.codServico.some(
-                              (service) => {
-                                const serviceKey =
-                                  typeof service === "string"
-                                    ? service
-                                    : service.chaveUnica;
-                                return serviceKey === codServico.chaveUnica;
-                              },
-                            )}
-                            onChange={() => handleServicoSelect(codServico)}
-                          />
-                          {codServico.chaveUnica} - {codServico.descricao}
-                        </label>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="px-4 py-2 text-gray-500">
-                      Nenhum Código de Serviço encontrado
-                    </li>
-                  )}
-                </ul>
-              )}
-            </div>
-          )}
-
-          {/* Campo upload File */}
-          <div
-            className={`mb-4 flex flex-col space-y-4 ${activeTab === 3 ? "" : "hidden"}`}
-          >
-            <label
-              htmlFor="fileUpload"
-              className="text-sm font-medium text-gray-700"
-            >
-              Upload de Certificado Digital
-            </label>
-            <div className="w-full">
-              <input
-                type="file"
-                id="fileUpload"
-                onChange={handleFileChange}
-                className="block w-full cursor-pointer rounded-lg border border-gray-300 bg-gray-50 text-sm text-gray-900 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:placeholder-gray-400"
-              />
-            </div>
-            <label
-              htmlFor="password"
-              className="text-sm font-medium text-gray-700"
-            >
-              Senha do Certificado Digital
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={handlePasswordChange}
-              placeholder="Digite a senha do certificado"
-              className="w-full rounded border p-2"
-            />
-            <button
-              type="button"
-              onClick={() => handleUpload(formDataState)} // Chama a função corretamente
-              className="w-full rounded-lg bg-[#b000ff] px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-[#690099] focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-[#690099] dark:focus:ring-blue-800"
-            >
-              Enviar Arquivo
-            </button>
-
-          </div>
-
-          {/* Exibir progresso do upload */}
-          {uploadProgress > 0 && uploadProgress < 100 && (
-            <div className="mt-4 h-2.5 w-full rounded-full bg-gray-200">
-              <div
-                className="h-2.5 rounded-full bg-[#b000ff]"
-                style={{ width: `${uploadProgress}%` }}
-              ></div>
-            </div>
-          )}
-
-          {uploadError && (
-            <div className="mt-4 text-sm text-red-600">
-              Erro no upload: {uploadError}
-            </div>
-          )}
-
-          {downloadURL && (
-            <div className="mt-4 text-sm text-green-600">
-              Upload concluído!{" "}
-              <a
-                href={downloadURL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-green-800"
-              >
-                Acesse o arquivo aqui.
-              </a>
-            </div>
-          )}
 
           {/* Outros campos */}
           {sections[activeTab].fields.map((field, index) => (
@@ -924,9 +779,177 @@ const FormPJ = () => {
           )}
         </form>
 
+        {/* Campo upload File */}
+        <div
+      className={`mt-8 flex flex-col space-y-10 rounded-2xl bg-white p-1 ${activeTab === 3 ? "" : "hidden"}`}
+    >
+      {/* Upload de Certificado Digital */}
+      <div className="flex flex-col space-y-8">
+        <label
+          htmlFor="fileUpload"
+          className="flex w-fit cursor-pointer items-center gap-2 rounded-lg bg-purple-600 px-8 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
+        >
+          <CloudArrowUpIcon className="h-5 w-5" />
+          <span>Upload Certificado Digital</span>
+        </label>
+        <input
+          type="file"
+          id="fileUpload"
+          onChange={handleFileChange}
+          className="block w-full cursor-pointer rounded-lg border border-gray-300 bg-gray-50 px-4 py-1 text-sm text-gray-900 shadow-sm transition file:mr-4 file:rounded-lg file:border-0 file:bg-purple-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-purple-700 hover:file:bg-purple-200 focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:focus:ring-purple-400"
+        />
+      </div>
+
+      {/* Senha do Certificado Digital */}
+      <div className="flex flex-col space-y-8">
+        <label
+          htmlFor="password"
+          className="flex w-fit items-center gap-2 rounded-lg bg-purple-600 px-8 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
+        >
+          <LockClosedIcon className="h-5 w-5" />
+          <span>Senha Certificado Digital</span>
+        </label>
+        <input
+          type="password"
+          id="password"
+          value={password}
+          onChange={handlePasswordChange}
+          placeholder="Digite a senha do certificado"
+          className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-1 text-sm text-gray-900 shadow-sm focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:focus:ring-purple-400"
+        />
+      </div>
+
+          <button
+            type="button"
+            onClick={() => handleUpload(formDataState)} // Chama a função corretamente
+            className="w-full rounded-lg bg-[#b000ff] px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-[#690099] focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-[#690099] dark:focus:ring-blue-800"
+          >
+            Enviar Arquivo
+          </button>
+        </div>
+
+        {/* Exibir progresso do upload */}
+        {uploadProgress > 0 && uploadProgress < 100 && (
+          <div className="mt-4 h-2.5 w-full rounded-full bg-gray-200">
+            <div
+              className="h-2.5 rounded-full bg-[#b000ff]"
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+          </div>
+        )}
+
+        {uploadError && (
+          <div className="mt-4 text-sm text-red-600">
+            Erro no upload: {uploadError}
+          </div>
+        )}
+
+        {downloadURL && (
+          <div className="mt-4 text-sm text-green-600">
+            Upload concluído!{" "}
+            <a
+              href={downloadURL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-green-800"
+            >
+              Acesse o arquivo aqui.
+            </a>
+          </div>
+        )}
+
+        {/* Campo para Procura dos códigos de serviços */}
+        {activeTab === 3 && (
+          <div className="mt-14 flex flex-col rounded-lg border border-gray-300 bg-white p-4 shadow-md">
+            {/* Botão para buscar códigos */}
+            <button
+              type="button"
+              onClick={handleServicoSearchClick}
+              className="flex items-center justify-between rounded-lg bg-purple-600 p-3 font-semibold text-[#F2F2F2] shadow-sm transition-all hover:bg-purple-700"
+            >
+              <span>Códigos de Serviço</span>
+              <MagnifyingGlassIcon className="h-5 w-5" />
+            </button>
+
+            {/* Lista de serviços */}
+            {showServicoList && (
+              <ul
+                ref={servicoListRef}
+                className="z-20 mt-4 max-h-[50vh] overflow-auto rounded-lg border border-gray-300 bg-white shadow-lg"
+              >
+                {servicoList.length > 0 ? (
+                  servicoList.map((codServico, index) => (
+                    <li key={index} className="cursor-pointer px-4 py-2">
+                      <label className="flex flex-row items-center justify-between rounded-lg bg-white p-3 text-xs">
+                        <div className="grid w-full grid-cols-5 divide-x divide-gray-200 text-center">
+                          <div className="flex flex-col items-center px-2 py-1">
+                            <span className="text-[11px] font-semibold text-gray-700">
+                              Cód. Municipal
+                            </span>
+                            <span className="text-[10px] text-gray-600">
+                              {codServico.codigoServicoMunicipal}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-center px-2 py-1">
+                            <span className="text-[11px] font-semibold text-gray-700">
+                              Serviço
+                            </span>
+                            <span className="w-full truncate text-[10px] text-gray-600">
+                              {codServico.descricao}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-center px-2 py-1">
+                            <span className="text-[11px] font-semibold text-gray-700">
+                              Município
+                            </span>
+                            <span className="text-[10px] text-gray-600">
+                              {codServico.municipio} - {codServico.uf}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-center px-2 py-1">
+                            <span className="text-[11px] font-semibold text-gray-700">
+                              Cód. IBGE
+                            </span>
+                            <span className="text-[10px] text-gray-600">
+                              {codServico.codigoCidadeIBGE}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-center px-2 py-1">
+                            <span className="text-[11px] font-semibold text-gray-700">
+                              Cód. Federal
+                            </span>
+                            <span className="text-[10px] text-gray-600">
+                              {codServico.codigoServicoFederal}
+                            </span>
+                          </div>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={formDataState.codServico.some(
+                            (service) =>
+                              typeof service !== "string" &&
+                              service.codigoServicoMunicipal ===
+                                codServico.codigoServicoMunicipal,
+                          )}
+                          onChange={() => handleServicoSelect(codServico)}
+                          className="ml-3 h-4 w-4 rounded border-gray-300 text-yellow-500 focus:ring-yellow-500"
+                        />
+                      </label>
+                    </li>
+                  ))
+                ) : (
+                  <li className="px-4 py-2 text-center text-gray-500">
+                    Nenhum Código de Serviço encontrado
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
+        )}
+
         {/* Botão para enviar dados da aba ativa */}
-        <div className="mt-4 flex justify-end">
-          {activeTab !== sections.length - 1 && (
+        <div className="mt-22 flex justify-end">
+          {activeTab === 4 && (
             <button
               type="button"
               className="rounded-lg bg-[#b000ff] px-6 py-2 text-white hover:bg-[#690099]"
@@ -940,57 +963,84 @@ const FormPJ = () => {
 
       {/* Modal de Quadro Societário */}
       {showModal && (
-  <div className="fixed inset-0 flex items-center justify-center bg-[#F2F2F2] bg-opacity-70 backdrop-blur-sm">
-  <div className="w-[90%] max-w-lg rounded-3xl bg-white p-8 shadow-2xl transition-all transform hover:scale-105">
-    <h2 className="mb-6 text-2xl font-semibold text-gray-800 text-center">Adicionar Sócio</h2>
-    <form>
-      {[
-        { label: "Nome", name: "nome", placeholder: "Digite o nome" },
-        { label: "Registro Profissional", name: "registroProfissional", placeholder: "Digite o registro profissional" },
-        { label: "E-mail", name: "email", placeholder: "Digite o e-mail" },
-        { label: "Telefone", name: "telefone", placeholder: "Digite o telefone" },
-        { label: "CPF", name: "cpf", placeholder: "Digite o CPF" },
-      ].map((field, index) => (
-        <div key={index} className="mb-6">
-          <label className="mb-2 block text-sm font-medium text-gray-700">{field.label}</label>
-          <input
-            name={field.name}
-            value={
-              formDataState.quadroSocietario.length > 0 &&
-              formDataState.quadroSocietario[formDataState.quadroSocietario.length - 1]
-                ? formDataState.quadroSocietario[formDataState.quadroSocietario.length - 1][field.name] || ""
-                : ""
-            }
-            placeholder={field.placeholder}
-            onChange={handleChange}
-            className="w-full rounded-lg border-2 border-gray-300 px-5 py-3 text-gray-800 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-400 transition-all ease-in-out"
-          />
+        <div className="fixed inset-0 flex items-center justify-center bg-[#F2F2F2] bg-opacity-70 backdrop-blur-sm">
+          <div className="w-[90%] max-w-lg transform rounded-3xl bg-white p-8 shadow-2xl transition-all hover:scale-105">
+            <h2 className="mb-6 text-center text-2xl font-semibold text-gray-800">
+              Adicionar Sócio
+            </h2>
+            <form>
+              {[
+                { label: "Nome", name: "nome", placeholder: "Digite o nome" },
+                {
+                  label: "Registro Profissional",
+                  name: "registroProfissional",
+                  placeholder: "Digite o registro profissional",
+                },
+                {
+                  label: "Agência",
+                  name: "agencia",
+                  placeholder: "Digite sua agência",
+                },
+                {
+                  label: "Conta",
+                  name: "conta",
+                  placeholder: "Digite o conta",
+                },
+                {
+                  label: "Banco",
+                  name: "banco",
+                  placeholder: "Digite o banco",
+                },
+                {
+                  label: "PIX",
+                  name: "pix",
+                  placeholder: "Digite a chave pix",
+                },
+                { label: "CPF", name: "cpf", placeholder: "Digite o CPF" },
+              ].map((field, index) => (
+                <div key={index} className="mb-6">
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    {field.label}
+                  </label>
+                  <input
+                    name={field.name}
+                    value={
+                      formDataState.quadroSocietario.length > 0
+                        ? formDataState.quadroSocietario[
+                            formDataState.quadroSocietario.length - 1
+                          ][field.name as keyof QuadroSocietario] || ""
+                        : (formDataState as Record<string, any>)[field.name] || ""
+                    }
+                    
+                    placeholder={field.placeholder}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-2 border-gray-300 px-5 py-3 text-gray-800 shadow-sm transition-all ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+              ))}
+
+              <div className="mt-8 flex justify-between">
+                <button
+                  type="button"
+                  className="w-1/3 transform rounded-lg bg-red-500 px-6 py-3 font-medium text-white shadow-lg transition-all hover:scale-105 hover:bg-red-600"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="w-1/3 transform rounded-lg bg-green-500 px-6 py-3 font-medium text-white shadow-lg transition-all hover:scale-105 hover:bg-green-600"
+                  onClick={() => {
+                    setShowModal(false);
+                    handleSubmit();
+                  }}
+                >
+                  Cadastrar Sócio
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      ))}
-
-      <div className="flex justify-between mt-8">
-        <button
-          type="button"
-          className="w-1/3 rounded-lg bg-red-500 px-6 py-3 text-white font-medium shadow-lg transition-all hover:bg-red-600 transform hover:scale-105"
-          onClick={() => setShowModal(false)}
-        >
-          Cancelar
-        </button>
-        <button
-          type="button"
-          className="w-1/3 rounded-lg bg-green-500 px-6 py-3 text-white font-medium shadow-lg transition-all hover:bg-green-600 transform hover:scale-105"
-          onClick={() => {
-            setShowModal(false);
-            handleSubmit();
-          }}
-        >
-          Cadastrar Sócio
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
       )}
     </div>
   );

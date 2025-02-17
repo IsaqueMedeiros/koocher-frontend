@@ -290,7 +290,7 @@ const TableNotas = () => {
   };
 
   return (
-    <div className="container mx-auto overflow-x-auto p-4 bg-white rounded-md shadow-xl">
+    <div className="container mx-auto overflow-x-auto p-4 bg-white rounded-md shadow-xl border border-gray-300">
       <div className="flex h-[10vh] flex-col ">
         <p className="text-SM w-fit rounded-md bg-[#b000ff] p-4 text-white">
           <b>Pesquisar NFS-e por Empresa:</b>
