@@ -968,27 +968,142 @@ Chave Pix: ${socio.pix}`;
                     <MagnifyingGlassIcon className="h-5 w-5" />
                   </button>
                 </div>
+                {/* Mostar a lista de CNPJS */}
                 {showCnpjList && (
-                  <ul
-                    ref={cnpjListRef}
-                    className="absolute z-10 mt-1 w-full rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800"
-                  >
-                    {cnpjList.length > 0 ? (
-                      cnpjList.map((cnpj, index) => (
-                        <li
-                          key={index}
-                          onClick={() => handleCnpjSelect(cnpj)}
-                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                  <div className="animate-fadeIn absolute  left-[2%] top-20 z-50 w-64 max-w-md transform overflow-hidden rounded-2xl border border-gray-100/50 bg-white/90 p-0 shadow-2xl backdrop-blur-lg transition-all duration-300 ease-in-out hover:scale-[1.02] dark:border-gray-700/50 dark:bg-gray-800/95 md:w-72">
+                    {/* Cabeçalho */}
+                    <div className="dark:to-gray-750/90 flex items-center justify-between border-b border-gray-100/70 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 px-4 py-3 dark:border-gray-700/70 dark:from-gray-800/90">
+                      <h3 className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="mr-2 h-4 w-4 animate-pulse text-blue-500 dark:text-blue-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
                         >
-                          {cnpj}
-                        </li>
-                      ))
-                    ) : (
-                      <li className="px-4 py-2 text-sm text-gray-500">
-                        Nenhum CNPJ encontrado
-                      </li>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                          />
+                        </svg>
+                        <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400">
+                          <p className="text-[0.7rem]">
+                            PRESTADORES CADASTRADOS
+                          </p>
+                        </span>
+                      </h3>
+                      <button
+                        className="transform rounded-full p-1 text-gray-400 transition-colors duration-200 hover:rotate-90 hover:bg-gray-200/70 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-600/70 dark:hover:text-gray-200"
+                        onClick={() => setShowCnpjList(false)}
+                        aria-label="Fechar lista"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Conteúdo */}
+                    <div className="bg-gradient-to-b from-transparent to-blue-50/30 p-3 dark:to-blue-900/10">
+                      {cnpjList.length > 0 ? (
+                        <ul className="custom-scrollbar max-h-64 space-y-2 overflow-y-auto pr-1">
+                          {cnpjList.map((cnpj, index) => (
+                            <li
+                              key={index}
+                              className="transform transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03]"
+                              style={{
+                                animationDelay: `${index * 50}ms`,
+                                animation: "fadeInUp 0.5s ease-out forwards",
+                                opacity: 0,
+                              }}
+                            >
+                              <button
+                                onClick={() => handleCnpjSelect(cnpj)}
+                                className="group flex w-full items-center rounded-lg border border-gray-100/80 bg-white/80 px-4 py-3 text-left text-sm text-gray-700 shadow-sm backdrop-blur-sm transition-all duration-300 ease-in-out hover:border-blue-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50/70 hover:shadow-md dark:border-gray-600/80 dark:bg-gray-700/90 dark:text-gray-200 dark:hover:border-blue-700 dark:hover:bg-gray-600/90"
+                              >
+                                <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 transition-colors duration-300 group-hover:bg-blue-100 dark:bg-gray-600 dark:group-hover:bg-gray-500">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4 text-blue-500 transition-transform duration-300 group-hover:scale-110 group-hover:text-blue-600 dark:text-blue-400 dark:group-hover:text-blue-300"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                </span>
+                                <span className="truncate font-medium transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-300">
+                                  {cnpj}
+                                </span>
+                                <span className="ml-auto transform text-blue-500 opacity-0 transition-all duration-300 group-hover:opacity-100 dark:text-blue-400">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 5l7 7-7 7"
+                                    />
+                                  </svg>
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="mb-3 h-12 w-12 text-gray-300 dark:text-gray-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                            />
+                          </svg>
+                          <p className="text-sm">Nenhum CNPJ disponível</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Rodapé (opcional) */}
+                    {cnpjList.length > 0 && (
+                      <div className="dark:to-gray-750/80 border-t border-gray-100/70 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 px-4 py-2 text-center text-xs text-gray-500 dark:border-gray-700/70 dark:from-gray-800/80 dark:text-gray-400">
+                        {cnpjList.length}{" "}
+                        {cnpjList.length === 1
+                          ? "CNPJ encontrado"
+                          : "CNPJs encontrados"}
+                      </div>
                     )}
-                  </ul>
+                  </div>
                 )}
               </div>
             )}
@@ -1020,7 +1135,144 @@ Chave Pix: ${socio.pix}`;
                     <MagnifyingGlassIcon className="h-5 w-5" />
                   </button>
                 </div>
+                {/* Mostrar Lista tomador */}
                 {showCnpjTomadorList && (
+                  <div className="animate-fadeIn absolute  left-[2%] top-20 z-50 w-64 max-w-md transform overflow-hidden rounded-2xl border border-gray-100/50 bg-white/90 p-0 shadow-2xl backdrop-blur-lg transition-all duration-300 ease-in-out hover:scale-[1.02] dark:border-gray-700/50 dark:bg-gray-800/95 md:w-72">
+                    {/* Cabeçalho */}
+                    <div className="dark:to-gray-750/90 flex items-center justify-between border-b border-gray-100/70 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 px-4 py-3 dark:border-gray-700/70 dark:from-gray-800/90">
+                      <h3 className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="mr-2 h-4 w-4 animate-pulse text-blue-500 dark:text-blue-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                          />
+                        </svg>
+                        <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400">
+                          <p className="text-[0.7rem]">TOMADORES CADASTRADOS</p>
+                        </span>
+                      </h3>
+                      <button
+                        className="transform rounded-full p-1 text-gray-400 transition-colors duration-200 hover:rotate-90 hover:bg-gray-200/70 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-600/70 dark:hover:text-gray-200"
+                        onClick={() => setShowCnpjTomadorList(false)}
+                        aria-label="Fechar lista"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Conteúdo */}
+                    <div className="bg-gradient-to-b from-transparent to-blue-50/30 p-3 dark:to-blue-900/10">
+                      {cnpjTomadorList.length > 0 ? (
+                        <ul className="custom-scrollbar max-h-64 space-y-2 overflow-y-auto pr-1">
+                          {cnpjTomadorList.map((tomador, index) => (
+                            <li
+                              key={index}
+                              className="transform transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03]"
+                              style={{
+                                animationDelay: `${index * 50}ms`,
+                                animation: "fadeInUp 0.5s ease-out forwards",
+                                opacity: 0,
+                              }}
+                            >
+                              <button
+                                onClick={() =>
+                                  handleTomadorSelect(tomador.Cnpj)
+                                }
+                                className="group flex w-full items-center rounded-lg border border-gray-100/80 bg-white/80 px-4 py-3 text-left text-sm text-gray-700 shadow-sm backdrop-blur-sm transition-all duration-300 ease-in-out hover:border-blue-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50/70 hover:shadow-md dark:border-gray-600/80 dark:bg-gray-700/90 dark:text-gray-200 dark:hover:border-blue-700 dark:hover:bg-gray-600/90"
+                              >
+                                <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 transition-colors duration-300 group-hover:bg-blue-100 dark:bg-gray-600 dark:group-hover:bg-gray-500">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4 text-blue-500 transition-transform duration-300 group-hover:scale-110 group-hover:text-blue-600 dark:text-blue-400 dark:group-hover:text-blue-300"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                </span>
+                                <span className="truncate font-medium transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-300">
+                                  {tomador.Cnpj}
+                                </span>
+                                <span className="ml-auto transform text-blue-500 opacity-0 transition-all duration-300 group-hover:opacity-100 dark:text-blue-400">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 5l7 7-7 7"
+                                    />
+                                  </svg>
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="mb-3 h-12 w-12 text-gray-300 dark:text-gray-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                            />
+                          </svg>
+                          <p className="text-sm">Nenhum CNPJ disponível</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Rodapé (opcional) */}
+                    {cnpjTomadorList.length > 0 && (
+                      <div className="dark:to-gray-750/80 border-t border-gray-100/70 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 px-4 py-2 text-center text-xs text-gray-500 dark:border-gray-700/70 dark:from-gray-800/80 dark:text-gray-400">
+                        {cnpjTomadorList.length}{" "}
+                        {cnpjTomadorList.length === 1
+                          ? "CNPJ encontrado"
+                          : "CNPJs encontrados"}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* {showCnpjTomadorList && (
                   <ul
                     ref={cnpjTomadorListRef}
                     className="absolute z-10 mt-1 w-full rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800"
@@ -1041,7 +1293,7 @@ Chave Pix: ${socio.pix}`;
                       </li>
                     )}
                   </ul>
-                )}
+                )} */}
               </div>
             )}
 
@@ -1359,92 +1611,176 @@ Chave Pix: ${socio.pix}`;
 
           {/* Campo para Procura dos códigos de serviços */}
           {activeTab === 2 && (
-            <div className="mt-14 flex flex-col rounded-lg border border-gray-300 bg-white p-4 shadow-md">
-              {/* Botão para buscar códigos */}
-              <button
-                type="button"
-                onClick={handleServicoSearchClick}
-                className="flex items-center justify-between rounded-lg bg-purple-600 p-3 font-semibold text-[#F2F2F2] shadow-sm transition-all hover:bg-purple-700"
-              >
-                <span>Códigos de Serviço</span>
-                <MagnifyingGlassIcon className="h-5 w-5" />
-              </button>
-
-              {/* Lista de serviços */}
-              {showServicoList && (
-                <ul
-                  ref={servicoListRef}
-                  className="z-20 mt-4 max-h-[50vh] overflow-auto rounded-lg border border-gray-300 bg-white shadow-lg"
-                >
-                  {servicoList.length > 0 ? (
-                    servicoList.map((codServico, index) => (
-                      <li key={index} className="cursor-pointer px-4 py-2">
-                        <label className="flex flex-row items-center justify-between rounded-lg bg-white p-3 text-xs">
-                          <div className="grid w-full grid-cols-5 divide-x divide-gray-200 text-center">
-                            <div className="flex flex-col items-center px-2 py-1">
-                              <span className="text-[11px] font-semibold text-gray-700">
-                                Cód. Municipal
-                              </span>
-                              <span className="text-[10px] text-gray-600">
-                                {codServico.codigoServicoMunicipal}
-                              </span>
-                            </div>
-                            <div className="flex flex-col items-center px-2 py-1">
-                              <span className="text-[11px] font-semibold text-gray-700">
-                                Serviço
-                              </span>
-                              <span className="w-full truncate text-[10px] text-gray-600">
-                                {codServico.descricao}
-                              </span>
-                            </div>
-                            <div className="flex flex-col items-center px-2 py-1">
-                              <span className="text-[11px] font-semibold text-gray-700">
-                                Município
-                              </span>
-                              <span className="text-[10px] text-gray-600">
-                                {codServico.municipio} - {codServico.uf}
-                              </span>
-                            </div>
-                            <div className="flex flex-col items-center px-2 py-1">
-                              <span className="text-[11px] font-semibold text-gray-700">
-                                Cód. IBGE
-                              </span>
-                              <span className="text-[10px] text-gray-600">
-                                {codServico.codigoCidadeIBGE}
-                              </span>
-                            </div>
-                            <div className="flex flex-col items-center px-2 py-1">
-                              <span className="text-[11px] font-semibold text-gray-700">
-                                Cód. Federal
-                              </span>
-                              <span className="text-[10px] text-gray-600">
-                                {codServico.codigoServicoFederal}
-                              </span>
-                            </div>
-                          </div>
-                          <input
-                            type="checkbox"
-                            checked={formDataState.codServico.some(
-                              (service) =>
-                                typeof service !== "string" &&
-                                service.codigoServicoMunicipal ===
-                                  codServico.codigoServicoMunicipal,
-                            )}
-                            onChange={() => handleServicoSelect(codServico)}
-                            className="ml-3 h-4 w-4 rounded border-gray-300 text-yellow-500 focus:ring-yellow-500"
-                          />
-                        </label>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="px-4 py-2 text-center text-gray-500">
-                      Nenhum Código de Serviço encontrado
-                    </li>
-                  )}
-                </ul>
-              )}
+  <div className="mt-6 h-[42vh] flex flex-col justify-between rounded-xl border border-[#b000ff] bg-white p-5 shadow-xl transition-all duration-300">
+    {/* Botão para buscar códigos - redesenhado com efeito hover melhorado */}
+    <div className="space-y-6 item-start">
+      {/* Cabeçalho com gradiente de texto */}
+      <h2 className="inline-block text-2xl font-bold bg-[#b000ff] bg-clip-text text-transparent">
+        Códigos de Serviço
+      </h2>
+      
+      {/* Botão de busca aprimorado */}
+      <button
+        type="button"
+        onClick={handleServicoSearchClick}
+        className="group w-full overflow-hidden rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 p-px shadow-lg transition-all duration-300 hover:from-purple-700 hover:to-indigo-700 hover:shadow-purple-200/40 dark:hover:shadow-purple-900/40"
+      >
+        <div className="flex items-center justify-between rounded-xl bg-white dark:bg-gray-900 p-1 transition-colors group-hover:bg-opacity-90 dark:group-hover:bg-opacity-90">
+          <div className="flex items-center space-x-3">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/40 transition-colors">
+              <MagnifyingGlassIcon className="h-5 w-5 text-purple-600 dark:text-purple-400 transition-transform duration-300 group-hover:scale-110" />
             </div>
+            <span className="font-semibold text-gray-500 dark:text-white">
+              Procurar Códigos Cadastrados
+            </span>
+          </div>
+          
+          <div className="flex items-center">
+            <span className="relative rounded-full bg-[#b000ff] px-4 py-1.5 text-sm font-medium text-white">
+              {servicoList.length > 0 ? servicoList.length : '0'}
+              <span className="ml-1 text-xs font-normal opacity-90">resultados</span>
+            </span>
+          </div>
+        </div>
+      </button>
+      
+      {/* Linha decorativa */}
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-purple-200 dark:via-purple-900/40 to-transparent"></div>
+    </div>
+
+    {/* Lista de serviços com animação de entrada */}
+    {showServicoList && (
+      <div className="mt-4 animate-fadeIn">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-700">Lista de Serviços Disponíveis</h3>
+          {servicoList.length > 0 && (
+            <button 
+              onClick={() => {/* adicionar função para selecionar todos */}}
+              className="text-xs font-medium text-purple-600 hover:text-purple-800"
+            >
+              Selecionar todos
+            </button>
           )}
+        </div>
+        
+        <ul
+          ref={servicoListRef}
+          className="max-h-[60vh] divide-y divide-gray-100 overflow-auto rounded-lg border border-gray-200 bg-white shadow-md"
+        >
+          {servicoList.length > 0 ? (
+            servicoList.map((codServico, index) => (
+              <li 
+                key={index} 
+                className={`transition-colors duration-150 hover:bg-purple-50 ${
+                  formDataState.codServico.some(
+                    (service) =>
+                      typeof service !== "string" &&
+                      service.codigoServicoMunicipal === codServico.codigoServicoMunicipal
+                  ) ? 'bg-purple-50' : ''
+                }`}
+              >
+                <label className="flex cursor-pointer items-center justify-between p-3">
+                  <div className="grid w-full grid-cols-5 gap-2 text-left">
+                    <div className="flex flex-col space-y-1 px-2">
+                      <span className="text-xs font-semibold text-gray-700">
+                        Cód. Municipal
+                      </span>
+                      <span className="text-sm font-medium text-purple-700">
+                        {codServico.codigoServicoMunicipal}
+                      </span>
+                    </div>
+                    <div className="flex flex-col space-y-1 px-2">
+                      <span className="text-xs font-semibold text-gray-700">
+                        Serviço
+                      </span>
+                      <span className="line-clamp-2 text-sm text-gray-600" title={codServico.descricao}>
+                        {codServico.descricao}
+                      </span>
+                    </div>
+                    <div className="flex flex-col space-y-1 px-2">
+                      <span className="text-xs font-semibold text-gray-700">
+                        Município
+                      </span>
+                      <div className="flex items-center space-x-1">
+                        <span className="text-sm text-gray-600">
+                          {codServico.municipio}
+                        </span>
+                        <span className="rounded bg-gray-200 px-1.5 py-0.5 text-xs font-medium text-gray-700">
+                          {codServico.uf}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col space-y-1 px-2">
+                      <span className="text-xs font-semibold text-gray-700">
+                        Cód. IBGE
+                      </span>
+                      <span className="font-mono text-sm text-gray-600">
+                        {codServico.codigoCidadeIBGE}
+                      </span>
+                    </div>
+                    <div className="flex flex-col space-y-1 px-2">
+                      <span className="text-xs font-semibold text-gray-700">
+                        Cód. Federal
+                      </span>
+                      <span className="font-mono text-sm text-gray-600">
+                        {codServico.codigoServicoFederal}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="ml-4 flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={formDataState.codServico.some(
+                        (service) =>
+                          typeof service !== "string" &&
+                          service.codigoServicoMunicipal ===
+                            codServico.codigoServicoMunicipal
+                      )}
+                      onChange={() => handleServicoSelect(codServico)}
+                      className="h-5 w-5 rounded-md border-gray-300 text-purple-600 
+                      transition duration-150 ease-in-out focus:ring-2 focus:ring-purple-500 focus:ring-offset-0"
+                    />
+                  </div>
+                </label>
+              </li>
+            ))
+          ) : (
+            <li className="flex h-24 flex-col items-center justify-center space-y-2 px-4 py-6 text-center">
+              <span className="text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 16a4 4 0 100-8 4 4 0 000 8zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </span>
+              <span className="text-sm text-gray-500">
+                Nenhum Código de Serviço encontrado
+              </span>
+              <button 
+                onClick={handleServicoSearchClick} 
+                className="text-xs font-medium text-purple-600 hover:text-purple-800"
+              >
+                Tente uma nova busca
+              </button>
+            </li>
+          )}
+        </ul>
+        
+        {servicoList.length > 0 && (
+          <div className="mt-4 flex justify-between">
+            <span className="text-xs text-gray-500">
+              {formDataState.codServico.length} serviço(s) selecionado(s)
+            </span>
+            <button 
+              className="rounded-md bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700 hover:bg-purple-200"
+              onClick={() => setShowServicoList(false)}
+            >
+              Fechar lista
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+)}
         </div>
 
         {/* Botão para enviar dados da aba ativa */}
