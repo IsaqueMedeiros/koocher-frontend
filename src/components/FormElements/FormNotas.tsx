@@ -495,8 +495,6 @@ const FormNotas = () => {
     setShowCnpjList(false);
   };
 
-  
-
   // DESCRIÇÃO Atualiza o estado quando os sócios disponíveis mudam
   const [editableSocios, setEditableSocios] = useState(sociosDisponiveis);
   const [formattedDescription, setFormattedDescription] = useState("");
@@ -513,22 +511,31 @@ const FormNotas = () => {
 
   const [editableDescription, setEditableDescription] = useState("");
 
-  const formatDescription = () => {
-  const formatted = editableSocios
+  // Apenas a função formatDescription modificada
+
+const formatDescription = () => {
+  // Verifica se há sócios selecionados
+  if (selectedSocios.length === 0) {
+    // Se não houver sócios selecionados, mostra um alerta
+    alert("Por favor, selecione pelo menos um sócio para gerar a descrição.");
+    return;
+  }
+
+  // Gera a descrição apenas para os sócios selecionados
+  const formatted = selectedSocios
     .map((socio) => {
       return `Dr. ${socio.nome} CRM ${socio.registroProfissional}
-  
-  Dados bancários:
-  Agência: ${socio.agencia}
-  Conta: ${socio.conta}
-  Chave Pix: ${socio.pix}`;
+      
+Dados bancários:
+Agência: ${socio.agencia}
+Conta: ${socio.conta}
+Chave Pix: ${socio.pix}`;
     })
     .join("\n\n");
 
   setEditableDescription(formatted); // Permite edição
   setFormattedDescription(formatted); // Define a variável usada na renderização condicional
 };
-
 
   // Certifique-se de que você tem um estado para armazenar os dados completos dos prestadores
   const [cnpjListData, setCnpjListData] = useState<any[]>([]);
@@ -1128,100 +1135,226 @@ const FormNotas = () => {
 
           {/* QUADRO DE SÓCIOS */}
           {activeTab === 0 && (
-            <div className="mt-24 rounded-2xl border border-[#b000ff] bg-white p-6 shadow-2xl">
-              {editableSocios.length > 0 ? (
-                <>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          {[
-                            "Nome",
-                            "CRM",
-                            "Agência",
-                            "Conta",
-                            "PIX",
-                            "Selecionar",
-                          ].map((header, i) => (
-                            <th
-                              key={i}
-                              className="border-b border-[#b000ff] px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+            <div className="mx-auto mt-10 max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="overflow-hidden rounded-2xl border border-purple-300 bg-gradient-to-b from-white to-purple-50 shadow-xl">
+                <div className="relative">
+                  {/* Decorative element - top */}
+                  <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-purple-600 opacity-10 blur-xl"></div>
+                  {/* Decorative element - bottom */}
+                  <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-purple-600 opacity-10 blur-xl"></div>
+
+                  {editableSocios.length > 0 ? (
+                    <>
+                      <div className="px-6 pt-6 sm:px-8">
+                        <h3 className="mb-4 text-lg font-semibold text-purple-800">
+                          Informações Bancárias dos Sócios
+                        </h3>
+                        <div className="overflow-hidden rounded-xl border border-purple-200 bg-white shadow-sm">
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-purple-100">
+                              <thead>
+                                <tr className="bg-gradient-to-r from-purple-600 to-purple-500">
+                                  {[
+                                    "Nome",
+                                    "CRM",
+                                    "Agência",
+                                    "Conta",
+                                    "PIX",
+                                    "Selecionar",
+                                  ].map((header, i) => (
+                                    <th
+                                      key={i}
+                                      className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white"
+                                    >
+                                      {header}
+                                    </th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-purple-50 bg-white">
+                                {editableSocios.map((socio, index) => (
+                                  <tr
+                                    key={index}
+                                    className="transition-all duration-200 ease-in-out hover:bg-purple-50"
+                                  >
+                                    {[
+                                      "nome",
+                                      "registroProfissional",
+                                      "agencia",
+                                      "conta",
+                                      "pix",
+                                    ].map((field) => (
+                                      <td key={field} className="px-4 py-3">
+                                        <div className="relative">
+                                          <input
+                                            type="text"
+                                            value={socio[field] || ""}
+                                            onChange={(e) =>
+                                              handleEditChange(
+                                                index,
+                                                field,
+                                                e.target.value,
+                                              )
+                                            }
+                                            className="w-full rounded-lg border border-purple-200 p-2.5 text-sm text-gray-800 placeholder-gray-400 shadow-sm transition-all duration-200 hover:shadow-md focus:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            placeholder={`Informe ${
+                                              field === "nome"
+                                                ? "o nome"
+                                                : field ===
+                                                    "registroProfissional"
+                                                  ? "o CRM"
+                                                  : field === "agencia"
+                                                    ? "a agência"
+                                                    : field === "conta"
+                                                      ? "a conta"
+                                                      : "o PIX"
+                                            }`}
+                                          />
+                                        </div>
+                                      </td>
+                                    ))}
+                                    <td className="px-4 py-3 text-center">
+                                      <label className="inline-flex items-center justify-center">
+                                        <input
+                                          type="checkbox"
+                                          checked={selectedSocios.some(
+                                            (s) => s.cpf === socio.cpf,
+                                          )}
+                                          onChange={() =>
+                                            handleSocioSelection(socio)
+                                          }
+                                          className="peer sr-only"
+                                        />
+                                        <div className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border-2 border-purple-300 transition-all duration-200 peer-checked:border-purple-600 peer-checked:bg-purple-600">
+                                          <svg
+                                            className="h-4 w-4 text-white opacity-0 transition-opacity duration-200 peer-checked:opacity-100"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2.5}
+                                              d="M5 13l4 4L19 7"
+                                            />
+                                          </svg>
+                                        </div>
+                                      </label>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-8 border-t border-purple-100 bg-white px-6 py-6 shadow-inner sm:px-8">
+                        <div className="flex flex-col items-stretch gap-6 lg:flex-row">
+                          <div className="flex flex-col justify-center">
+                            <button
+                              onClick={formatDescription}
+                              className="inline-flex transform items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 active:translate-y-0"
                             >
-                              {header}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200 bg-white">
-                        {editableSocios.map((socio, index) => (
-                          <tr
-                            key={index}
-                            className="transition-colors duration-150 ease-in-out hover:bg-gray-100"
-                          >
-                            {[
-                              "nome",
-                              "registroProfissional",
-                              "agencia",
-                              "conta",
-                              "pix",
-                            ].map((field) => (
-                              <td
-                                key={field}
-                                className="whitespace-nowrap border-b px-6 py-4"
+                              <svg
+                                className="mr-2 h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
                               >
-                                <input
-                                  type="text"
-                                  value={socio[field] || ""}
-                                  onChange={(e) =>
-                                    handleEditChange(
-                                      index,
-                                      field,
-                                      e.target.value,
-                                    )
-                                  }
-                                  className="w-full rounded-lg border border-gray-300 p-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#b000ff]"
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 5l7 7-7 7"
                                 />
-                              </td>
-                            ))}
-                            <td className="whitespace-nowrap border-b px-6 py-4 text-center">
-                              <input
-                                type="checkbox"
-                                checked={selectedSocios.some(
-                                  (s) => s.cpf === socio.cpf,
-                                )}
-                                onChange={() => handleSocioSelection(socio)}
-                                className="form-checkbox h-5 w-5 text-[#b000ff] transition duration-150 ease-in-out"
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                              </svg>
+                              Gerar Descrição NFE-e
+                            </button>
+                          </div>
 
-                  <button
-                    onClick={formatDescription}
-                    className="mt-6 rounded-lg bg-[#b000ff] px-6 py-3 text-white shadow-lg transition duration-200 ease-in-out hover:bg-[#9f00e1] focus:outline-none focus:ring-2 focus:ring-[#b000ff]"
-                  >
-                    Gerar Descrição NFE-e
-                  </button>
-
-                  {formattedDescription && (
-                    <textarea
-                      className="mt-6 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#b000ff]"
-                      rows={6}
-                      value={editableDescription}
-                      onChange={(e) => setEditableDescription(e.target.value)} // Permite edição
-                    />
+                          <div className="flex-1">
+                            {formattedDescription ? (
+                              <div className="h-full">
+                                <textarea
+                                  className="h-full min-h-[120px] w-full rounded-lg border border-purple-200 bg-purple-50 px-4 py-3 text-gray-800 shadow-inner transition-all duration-200 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                  rows={5}
+                                  value={editableDescription}
+                                  onChange={(e) =>
+                                    setEditableDescription(e.target.value)
+                                  }
+                                  placeholder="Descrição gerada aparecerá aqui..."
+                                />
+                              </div>
+                            ) : (
+                              <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-purple-200 bg-purple-50 p-6 text-sm text-purple-400">
+                                <svg
+                                  className="mr-2 h-5 w-5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                  />
+                                </svg>
+                                <p>
+                                  Clique em &quot;Gerar Descrição NFE-e&quot;
+                                  para criar o conteúdo
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="px-6 py-16 text-center">
+                      <div className="mb-4 inline-flex items-center justify-center rounded-full bg-purple-50 p-4">
+                        <svg
+                          className="h-12 w-12 text-purple-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="mt-2 text-xl font-semibold text-purple-800">
+                        Nenhum sócio encontrado
+                      </h3>
+                      <p className="mx-auto mt-3 max-w-md text-sm text-gray-500">
+                        Parece que não há sócios cadastrados no momento.
+                        Adicione novos sócios para visualizá-los nesta tabela.
+                      </p>
+                    </div>
                   )}
-                </>
-              ) : (
-                <p className="text-center text-gray-600">
-                  Nenhum sócio encontrado.
-                </p>
+                </div>
+              </div>
+
+              {/* Contador de sócios selecionados - elemento flutuante */}
+              {editableSocios.length > 0 && selectedSocios.length > 0 && (
+                <div className="fixed bottom-4 right-4 flex items-center rounded-full bg-purple-700 px-4 py-2 text-white shadow-lg">
+                  <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-semibold text-purple-700">
+                    {selectedSocios.length}
+                  </span>
+                  <span className="text-sm font-medium">
+                    Sócios selecionados
+                  </span>
+                </div>
               )}
             </div>
           )}
+
           {/* QUADRO DE SÓCIOS FIM */}
 
           {/* Campo para Procura dos códigos de serviços */}
