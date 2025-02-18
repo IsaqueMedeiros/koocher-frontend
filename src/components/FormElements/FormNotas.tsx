@@ -495,10 +495,12 @@ const FormNotas = () => {
     setShowCnpjList(false);
   };
 
+  
+
+  // DESCRIÇÃO Atualiza o estado quando os sócios disponíveis mudam
   const [editableSocios, setEditableSocios] = useState(sociosDisponiveis);
   const [formattedDescription, setFormattedDescription] = useState("");
 
-  // Atualiza o estado quando os sócios disponíveis mudam
   useEffect(() => {
     setEditableSocios(sociosDisponiveis);
   }, [sociosDisponiveis]);
@@ -512,19 +514,21 @@ const FormNotas = () => {
   const [editableDescription, setEditableDescription] = useState("");
 
   const formatDescription = () => {
-    const formatted = editableSocios
-      .map((socio) => {
-        return `Dr. ${socio.nome} CRM ${socio.registroProfissional}
+  const formatted = editableSocios
+    .map((socio) => {
+      return `Dr. ${socio.nome} CRM ${socio.registroProfissional}
   
   Dados bancários:
   Agência: ${socio.agencia}
   Conta: ${socio.conta}
   Chave Pix: ${socio.pix}`;
-      })
-      .join("\n\n"); // Junta os sócios com um espaço entre eles
+    })
+    .join("\n\n");
 
-    setEditableDescription(formatted); // Define o valor inicial, mas permite edição
-  };
+  setEditableDescription(formatted); // Permite edição
+  setFormattedDescription(formatted); // Define a variável usada na renderização condicional
+};
+
 
   // Certifique-se de que você tem um estado para armazenar os dados completos dos prestadores
   const [cnpjListData, setCnpjListData] = useState<any[]>([]);
@@ -1079,12 +1083,7 @@ const FormNotas = () => {
                           type="text"
                           name={field.name}
                           value={(formDataState as any)[field.name] || ""}
-                          onChange={(e) => {
-                            setFormDataState((prevState) => ({
-                              ...prevState,
-                              [field.name]: e.target.value, // Permite apagar sem sumir
-                            }));
-                          }}
+                          onChange={handleChange} // Aplica a máscara corretamente
                           placeholder="Insira a %"
                           className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                         />
