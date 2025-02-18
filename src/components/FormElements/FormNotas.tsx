@@ -4,8 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/16/solid";
 import TableNotas from "../Tables/TableNotas";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { maskCNPJ, maskValor, maskMesAno, maskPercentual } from "../Mask/mask";
 
 const FormNotas = () => {
+  //Estado para onchange do input checkbox
+  const [activeFields, setActiveFields] = useState(new Set());
+
   const [showModal, setShowModal] = useState(false); // Controla o modal de Quadro Societário
   const [activeTab, setActiveTab] = useState(0); // Controla a aba ativa
   //States para funções CNPJ
@@ -75,9 +79,12 @@ const FormNotas = () => {
     );
 
     if (selectedTomador) {
+      // Aplica a máscara ao CNPJ retornado da API
+      const cnpjFormatado = maskCNPJ(selectedTomador.Cnpj || "");
+
       setFormDataState((prevState) => ({
         ...prevState,
-        cnpjTomador: selectedTomador.Cnpj, // Correcting by passing the CNPJ as string
+        cnpjTomador: cnpjFormatado, // Usa o CNPJ formatado
         razaoSocialTomador: selectedTomador.RazaoSocial,
         inscricaoMunicipalTomador: selectedTomador.InscricaoMunicipal,
         cepTomador: selectedTomador.Cep,
@@ -244,9 +251,30 @@ const FormNotas = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    let formattedValue = value;
+
+    if (name.startsWith("cnpj")) {
+      formattedValue = maskCNPJ(value);
+    } else if (name === "valor") {
+      formattedValue = maskValor(value);
+    } else if (name === "competencia") {
+      formattedValue = maskMesAno(value);
+    } else if (
+      [
+        "retemISS",
+        "retemIR",
+        "retemPIS",
+        "retemCOFINS",
+        "retemINSS",
+        "retemCSLL",
+      ].includes(name)
+    ) {
+      formattedValue = maskPercentual(value); // Aplica a máscara de percentual corretamente
+    }
+
     setFormDataState((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: formattedValue,
     }));
   };
 
@@ -336,62 +364,60 @@ const FormNotas = () => {
   };
 
   // -----> ENDPOINT PARA EMITIR NOTA FISCAL UTILIZANDO A API DO NFE.IO <----
-const handleSubmit = async (e?: React.FormEvent) => {
-  if (e) e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
 
-  // Separando os dados do código de serviço de forma clara
-  const codigosServicoFormatados = formDataState.codServico.map((service) => {
-    if (typeof service !== "string") {
-      return {
-        codigoMunicipal: service.codigoServicoMunicipal,
-        codigoFederal: service.codigoServicoFederal,
-        codigoIBGE: service.codigoCidadeIBGE,
-      };
-    }
-    return service;
-  });
-
-  // Criando o objeto de dados da nota fiscal com os dados formatados
-  const dadosNota = {
-  ...formDataState,
-  codServico: codigosServicoFormatados, // Array formatado de códigos de serviço
-  descricao: editableDescription, // Descrição gerada
-  valor: formDataState.valor, // Valor do serviço
-  retemISS: formDataState.retemISS, // Percentual de ISS Retido
-  retemIR: formDataState.retemIR, // Percentual de IR Retido
-  retemPIS: formDataState.retemPIS, // Percentual de PIS Retido
-  retemCOFINS: formDataState.retemCOFINS, // Percentual de COFINS Retido
-  retemINSS: formDataState.retemINSS, // Percentual de INSS Retido
-  retemCSLL: formDataState.retemCSLL, // Percentual de CSLL Retido
-};
-
-
-  try {
-    const response = await fetch(`${process.env.API_URL}/api/cadastroNotas`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(dadosNota), // Enviando os dados no formato correto
+    // Separando os dados do código de serviço de forma clara
+    const codigosServicoFormatados = formDataState.codServico.map((service) => {
+      if (typeof service !== "string") {
+        return {
+          codigoMunicipal: service.codigoServicoMunicipal,
+          codigoFederal: service.codigoServicoFederal,
+          codigoIBGE: service.codigoCidadeIBGE,
+        };
+      }
+      return service;
     });
 
-    if (!response.ok) {
-      throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
+    // Criando o objeto de dados da nota fiscal com os dados formatados
+    const dadosNota = {
+      ...formDataState,
+      codServico: codigosServicoFormatados, // Array formatado de códigos de serviço
+      descricao: editableDescription, // Descrição gerada
+      valor: formDataState.valor, // Valor do serviço
+      retemISS: formDataState.retemISS, // Percentual de ISS Retido
+      retemIR: formDataState.retemIR, // Percentual de IR Retido
+      retemPIS: formDataState.retemPIS, // Percentual de PIS Retido
+      retemCOFINS: formDataState.retemCOFINS, // Percentual de COFINS Retido
+      retemINSS: formDataState.retemINSS, // Percentual de INSS Retido
+      retemCSLL: formDataState.retemCSLL, // Percentual de CSLL Retido
+    };
+
+    try {
+      const response = await fetch(`${process.env.API_URL}/api/cadastroNotas`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dadosNota), // Enviando os dados no formato correto
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
+      }
+
+      console.log("Nota enviada com sucesso:", dadosNota);
+
+      if (formDataState.cnpjPrestador) {
+        const cnpjSemBarras = formDataState.cnpjPrestador.replace(/[^\d]/g, "");
+        localStorage.setItem("cnpj", cnpjSemBarras);
+        console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
+      }
+    } catch (error) {
+      console.error("Erro ao enviar os dados:", error);
     }
-
-    console.log("Nota enviada com sucesso:", dadosNota);
-
-    if (formDataState.cnpjPrestador) {
-      const cnpjSemBarras = formDataState.cnpjPrestador.replace(/[^\d]/g, "");
-      localStorage.setItem("cnpj", cnpjSemBarras);
-      console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
-    }
-  } catch (error) {
-    console.error("Erro ao enviar os dados:", error);
-  }
-};
-// -----> ENDPOINT PARA EMITIR NOTA FISCAL UTILIZANDO A API DO NFE.IO (FIM) <----
-
+  };
+  // -----> ENDPOINT PARA EMITIR NOTA FISCAL UTILIZANDO A API DO NFE.IO (FIM) <----
 
   // Estado para armazenar os sócios disponíveis e os selecionados
   interface QuadroSocietario {
@@ -428,10 +454,13 @@ const handleSubmit = async (e?: React.FormEvent) => {
     const prestador = cnpjListData.find((p: any) => p.Cnpj === selectedCnpj);
 
     if (prestador) {
+      // Aplica a máscara ao CNPJ retornado do banco de dados
+      const cnpjFormatado = maskCNPJ(prestador.Cnpj || "");
+
       setFormDataState((prevState) => ({
         ...prevState,
         idPrestador: prestador.idCadastro || "",
-        cnpjPrestador: prestador.Cnpj || "",
+        cnpjPrestador: cnpjFormatado, // Usa o CNPJ formatado
         razaoSocial: prestador.RazaoSocial || "",
         regProfissional: prestador.EmailEmpresa || "",
       }));
@@ -465,6 +494,7 @@ const handleSubmit = async (e?: React.FormEvent) => {
 
     setShowCnpjList(false);
   };
+
   const [editableSocios, setEditableSocios] = useState(sociosDisponiveis);
   const [formattedDescription, setFormattedDescription] = useState("");
 
@@ -492,10 +522,9 @@ const handleSubmit = async (e?: React.FormEvent) => {
   Chave Pix: ${socio.pix}`;
       })
       .join("\n\n"); // Junta os sócios com um espaço entre eles
-  
+
     setEditableDescription(formatted); // Define o valor inicial, mas permite edição
   };
-  
 
   // Certifique-se de que você tem um estado para armazenar os dados completos dos prestadores
   const [cnpjListData, setCnpjListData] = useState<any[]>([]);
@@ -632,27 +661,6 @@ const handleSubmit = async (e?: React.FormEvent) => {
           name: "valor",
           placeholder: "Valor",
         },
-        // {
-        //   label: "Carga Horária",
-        //   name: "cargaHoraria",
-        //   placeholder: "Carga Horária",
-        // },
-        // {
-        //   label: "Local Serviços Prestados",
-        //   name: "localServicos",
-        //   placeholder: "Local Serviços Prestados",
-        //   extra: "",
-        // },
-        // {
-        //   label: "Corpo da Nota",
-        //   name: "corpoNota",
-        //   placeholder: "Corpo da Nota",
-        // },
-        // {
-        //   label: "Outras Informações",
-        //   name: "outrasInfo",
-        //   placeholder: "Outras Informações",
-        // },
       ],
     },
     {
@@ -1035,19 +1043,28 @@ const handleSubmit = async (e?: React.FormEvent) => {
 
                 {field.name.startsWith("retem") ? (
                   <div className="flex items-center space-x-2">
-                    {typeof (formDataState as any)[field.name] === "boolean" ? (
-                      // Checkbox
+                    {!activeFields.has(field.name) ? (
                       <>
+                        {/* Checkbox aparece primeiro */}
                         <input
                           type="checkbox"
                           name={field.name}
-                          checked={(formDataState as any)[field.name] || false}
+                          checked={Boolean((formDataState as any)[field.name])}
                           onChange={(e) => {
-                            const checked = e.target.checked;
                             setFormDataState((prevState) => ({
                               ...prevState,
-                              [field.name]: checked ? "" : false, // Troca para input se marcado
+                              [field.name]: e.target.checked ? "00,00" : false, // Define um valor inicial para o input
                             }));
+
+                            setActiveFields((prev) => {
+                              const newSet = new Set(prev);
+                              if (e.target.checked) {
+                                newSet.add(field.name);
+                              } else {
+                                newSet.delete(field.name);
+                              }
+                              return newSet;
+                            });
                           }}
                           className="form-checkbox h-5 w-5 text-blue-600 transition focus:ring-2 focus:ring-blue-500"
                         />
@@ -1056,16 +1073,22 @@ const handleSubmit = async (e?: React.FormEvent) => {
                         </span>
                       </>
                     ) : (
-                      // Input de texto + Botão para voltar ao checkbox
+                      // Input de texto + botão para voltar ao checkbox
                       <div className="flex items-center space-x-2">
                         <input
                           type="text"
                           name={field.name}
                           value={(formDataState as any)[field.name] || ""}
-                          onChange={handleChange}
+                          onChange={(e) => {
+                            setFormDataState((prevState) => ({
+                              ...prevState,
+                              [field.name]: e.target.value, // Permite apagar sem sumir
+                            }));
+                          }}
                           placeholder="Insira a %"
                           className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                         />
+
                         {/* Botão para voltar ao checkbox */}
                         <button
                           type="button"
@@ -1074,6 +1097,12 @@ const handleSubmit = async (e?: React.FormEvent) => {
                               ...prevState,
                               [field.name]: false, // Volta para checkbox
                             }));
+
+                            setActiveFields((prev) => {
+                              const newSet = new Set(prev);
+                              newSet.delete(field.name);
+                              return newSet;
+                            });
                           }}
                           className="rounded bg-transparent p-2 text-gray-700 dark:text-white"
                         >
@@ -1180,11 +1209,11 @@ const handleSubmit = async (e?: React.FormEvent) => {
 
                   {formattedDescription && (
                     <textarea
-                    className="mt-6 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#b000ff]"
-                    rows={6}
-                    value={editableDescription}
-                    onChange={(e) => setEditableDescription(e.target.value)} // Permite edição
-                  />        
+                      className="mt-6 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#b000ff]"
+                      rows={6}
+                      value={editableDescription}
+                      onChange={(e) => setEditableDescription(e.target.value)} // Permite edição
+                    />
                   )}
                 </>
               ) : (

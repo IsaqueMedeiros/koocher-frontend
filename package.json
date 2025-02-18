@@ -29,7 +29,8 @@
     "react": "^19.0.0",
     "react-apexcharts": "^1.4.1",
     "react-dom": "^19.0.0",
-    "react-input-mask": "^2.0.4"
+    "react-input-mask": "^2.0.4",
+    "ts-input-mask": "^2.2.0"
   },
   "devDependencies": {
     "@types/node": "^20",
