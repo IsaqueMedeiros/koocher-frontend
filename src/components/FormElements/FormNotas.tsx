@@ -513,29 +513,29 @@ const FormNotas = () => {
 
   // Apenas a função formatDescription modificada
 
-const formatDescription = () => {
-  // Verifica se há sócios selecionados
-  if (selectedSocios.length === 0) {
-    // Se não houver sócios selecionados, mostra um alerta
-    alert("Por favor, selecione pelo menos um sócio para gerar a descrição.");
-    return;
-  }
+  const formatDescription = () => {
+    // Verifica se há sócios selecionados
+    if (selectedSocios.length === 0) {
+      // Se não houver sócios selecionados, mostra um alerta
+      alert("Por favor, selecione pelo menos um sócio para gerar a descrição.");
+      return;
+    }
 
-  // Gera a descrição apenas para os sócios selecionados
-  const formatted = selectedSocios
-    .map((socio) => {
-      return `Dr. ${socio.nome} CRM ${socio.registroProfissional}
+    // Gera a descrição apenas para os sócios selecionados
+    const formatted = selectedSocios
+      .map((socio) => {
+        return `Dr. ${socio.nome} CRM ${socio.registroProfissional}
       
 Dados bancários:
 Agência: ${socio.agencia}
 Conta: ${socio.conta}
 Chave Pix: ${socio.pix}`;
-    })
-    .join("\n\n");
+      })
+      .join("\n\n");
 
-  setEditableDescription(formatted); // Permite edição
-  setFormattedDescription(formatted); // Define a variável usada na renderização condicional
-};
+    setEditableDescription(formatted); // Permite edição
+    setFormattedDescription(formatted); // Define a variável usada na renderização condicional
+  };
 
   // Certifique-se de que você tem um estado para armazenar os dados completos dos prestadores
   const [cnpjListData, setCnpjListData] = useState<any[]>([]);
