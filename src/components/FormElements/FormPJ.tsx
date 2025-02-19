@@ -573,28 +573,7 @@ const FormPJ = () => {
       ],
     },
     {
-      title: "Fiscal",
-      fields: [
-        // { label: "Regime Tributário", name: "regimeTrib", placeholder: "Regime Tributário" }, LISTA SUSPSENSA COM CODIGOS DE SERVIÇOS DE ACORDO COM A CIDADE E A UF
-        {
-          label: "Regime Tributário",
-          name: "regimeTrib",
-          placeholder: "Regime Tributário",
-        },
-        {
-          label: "Natureza Juridica",
-          name: "naturezaJuridica",
-          placeholder: "Natureza Juridica",
-        },
-        {
-          label: "Inscricao Municipal",
-          name: "inscricaoMunicipal",
-          placeholder: "Inscricao Municipal",
-        },
-      ],
-    },
-    {
-      title: "Quadro Societário",
+      title: "Sócios",
       fields: [],
       extra: (
         <div className="flex h-[50vh] w-[98%] flex-row items-center justify-around dark:bg-transparent">
@@ -655,6 +634,27 @@ const FormPJ = () => {
           </div>
         </div>
       ),
+    },
+    {
+      title: "Fiscal",
+      fields: [
+        // { label: "Regime Tributário", name: "regimeTrib", placeholder: "Regime Tributário" }, LISTA SUSPSENSA COM CODIGOS DE SERVIÇOS DE ACORDO COM A CIDADE E A UF
+        {
+          label: "Regime Tributário",
+          name: "regimeTrib",
+          placeholder: "Regime Tributário",
+        },
+        {
+          label: "Natureza Juridica",
+          name: "naturezaJuridica",
+          placeholder: "Natureza Juridica",
+        },
+        {
+          label: "Inscricao Municipal",
+          name: "inscricaoMunicipal",
+          placeholder: "Inscricao Municipal",
+        },
+      ],
     },
   ];
 
@@ -868,7 +868,7 @@ const FormPJ = () => {
 
         {/* Campo upload File */}
         <div
-          className={`mt-8 flex flex-col space-y-10 rounded-2xl bg-white p-1 ${activeTab === 3 ? "" : "hidden"}`}
+          className={`mt-8 flex flex-col space-y-10 rounded-2xl bg-white p-1 ${activeTab === 4 ? "" : "hidden"}`}
         >
           {/* Upload de Certificado Digital */}
           <div className="flex flex-col space-y-8">
@@ -946,7 +946,7 @@ const FormPJ = () => {
         )}
 
         {/* Campo para Procura dos códigos de serviços */}
-        {activeTab === 3 && (
+        {activeTab === 4 && (
           <div className="mt-14 flex flex-col rounded-lg border border-gray-300 bg-white p-4 shadow-md">
             {/* Botão para buscar códigos */}
             <button

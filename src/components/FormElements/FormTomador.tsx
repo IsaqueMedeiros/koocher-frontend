@@ -126,54 +126,6 @@ const FormTomador = () => {
     };
   }, []);
 
-  const fetchCNPJData = async (cnpj: string) => {
-    try {
-      const response = await fetch(`/api/cnpj/${cnpj}`);
-      if (!response.ok) {
-        throw new Error("CNPJ não encontrado");
-      }
-      const data = await response.json();
-
-      // Exibe a lista de CNPJs retornada
-      setCnpjList(data.cnpjList || []);
-      setShowCnpjList(true); // Mostra a lista de CNPJs
-    } catch (error) {
-      console.error("Erro ao buscar CNPJ:", error);
-      setCnpjList([]); // Limpa a lista de CNPJs em caso de erro
-      setShowCnpjList(true); // Garante que a lista seja mostrada
-    }
-  };
-
-  // const handleSelectCNPJ = async (selectedCnpj: string) => {
-  //   try {
-  //     const response = await fetch(
-  //       `${process.env.API_URL}/api/cnpj/${selectedCnpj}`,
-  //     );
-  //     if (!response.ok) {
-  //       throw new Error("Erro ao buscar dados do CNPJ");
-  //     }
-  //     const data = await response.json();
-
-  //     // Preenche os campos com os dados do CNPJ selecionado
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       cnpj: selectedCnpj,
-  //       nome: data.nome || "",
-  //       endereco: data.endereco || "",
-  //       telefone: data.telefone || "",
-  //       email: data.email || "",
-  //       // Outros campos necessários
-  //     }));
-
-  //     // Fecha a lista após seleção e garante que a lista seja escondida
-  //     setShowCnpjList(false);
-
-  //     // Aqui você pode adicionar qualquer lógica adicional para manipular a UI ou dados
-  //   } catch (error) {
-  //     console.error("Erro ao buscar dados do CNPJ selecionado:", error);
-  //   }
-  // };
-
 
   const [cnpjTomadorList, setCnpjTomadorList] = useState<Tomador[]>([]);
   const [showCnpjTomadorList, setShowCnpjTomadorList] = useState(false);

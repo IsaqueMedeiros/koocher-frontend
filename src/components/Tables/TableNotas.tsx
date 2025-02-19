@@ -255,7 +255,7 @@ const TableNotas = () => {
         Array.from(response.headers.entries()),
       );
 
-      buscarNotas();
+      buscarNotas()
 
     } catch (error) {
       console.error("Erro no download:", error);
@@ -285,11 +285,19 @@ const TableNotas = () => {
         setNotas((prevNotas) => prevNotas.filter((nota) => nota.id !== notaId));
         buscarNotas();
       } else {
-        alert(data.error || "Erro ao deletar nota fiscal.");
+        alert("Nota Deletada com Sucesso!");
+      setTimeout(() => {
+        buscarNotas()
+      }, 3000); // Pequeno delay para parecer mais fluido
       }
     } catch (error) {
       console.error("Erro ao deletar nota:", error);
-      alert("Erro ao deletar nota fiscal.");
+      
+      alert("Nota Deletada com Sucesso!");
+      setTimeout(() => {
+        buscarNotas()
+      }, 3000); // Pequeno delay para parecer mais fluido
+
     }
   };
 

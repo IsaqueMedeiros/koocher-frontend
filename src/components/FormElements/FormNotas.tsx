@@ -415,9 +415,9 @@ const FormNotas = () => {
       }
 
        // Atualizar os dados em segundo plano
-       setTimeout(() => {
-        window.location.reload();
-      }, 500); // Pequeno delay para parecer mais fluido
+      //  setTimeout(() => {
+      //   window.location.reload();
+      // }, 500); // Pequeno delay para parecer mais fluido
 
       
     } catch (error) {
