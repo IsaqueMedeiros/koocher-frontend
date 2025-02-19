@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
 import { Buffer } from "buffer";
 import { CloudArrowUpIcon, LockClosedIcon } from "@heroicons/react/24/solid";
-
+import { maskCNPJ } from "../Mask/mask";
 
 const FormPJ = () => {
   const [showModal, setShowModal] = useState(false); // Controla o modal de Quadro Societário
@@ -67,7 +67,6 @@ const FormPJ = () => {
     const companyData = {
       ...formDataState,
       codServico: codigosServicoFormatados, // Array formatado de códigos de serviço
-
     };
 
     // Convertendo o objeto companyData para string JSON
@@ -263,6 +262,11 @@ const FormPJ = () => {
   });
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    let formattedValue = value;
+
+    if (name === "Cnpj") {
+      formattedValue = maskCNPJ(value);
+    } 
 
     // Verifica se o campo alterado é o CNPJ
     if (name === "Cnpj") {
@@ -289,7 +293,7 @@ const FormPJ = () => {
       }
 
       // Se o campo for um campo normal, apenas atualiza o estado normalmente
-      return { ...prevState, [name]: value };
+      return { ...prevState, [name]: formattedValue, };
     });
   };
 
@@ -361,7 +365,7 @@ const FormPJ = () => {
 
   const handleCnpjSelect = (selectedCnpj: string) => {
     const prestador = cnpjListData.find((p: any) => p.Cnpj === selectedCnpj);
-  
+
     if (prestador) {
       const expectedKeys = [
         "nome",
@@ -370,11 +374,11 @@ const FormPJ = () => {
         "conta",
         "banco",
         "pix",
-        "cpf"
+        "cpf",
       ];
-  
+
       let quadroSocietario: QuadroSocietario[] = [];
-  
+
       if (prestador.QuadroSocietario) {
         try {
           // Verifica se é uma string e faz o parsing para JSON
@@ -382,23 +386,23 @@ const FormPJ = () => {
             typeof prestador.QuadroSocietario === "string"
               ? JSON.parse(prestador.QuadroSocietario)
               : prestador.QuadroSocietario;
-  
+
           if (Array.isArray(parsedQuadroSocietario)) {
             quadroSocietario = parsedQuadroSocietario.filter((socio) =>
-              expectedKeys.every((key) => socio[key] && socio[key] !== "N/A")
+              expectedKeys.every((key) => socio[key] && socio[key] !== "N/A"),
             );
           } else if (typeof parsedQuadroSocietario === "object") {
             quadroSocietario = [parsedQuadroSocietario].filter((socio) =>
-              expectedKeys.every((key) => socio[key] && socio[key] !== "N/A")
+              expectedKeys.every((key) => socio[key] && socio[key] !== "N/A"),
             );
           }
         } catch (error) {
           console.error("Erro ao processar QuadroSocietario:", error);
         }
       }
-  
+
       console.log("Quadro Societário processado:", quadroSocietario); // Debug para verificar se os dados estão corretos
-  
+
       setFormDataState((prevState) => ({
         ...prevState,
         IdCadastro: prestador.idCadastro || "",
@@ -416,10 +420,9 @@ const FormPJ = () => {
         quadroSocietario, // Atualiza corretamente o quadro societário
       }));
     }
-  
+
     setShowCnpjList(false);
   };
-  
 
   // Certifique-se de que você tem um estado para armazenar os dados completos dos prestadores
   const [cnpjListData, setCnpjListData] = useState<any[]>([]);
@@ -469,7 +472,7 @@ const FormPJ = () => {
     "conta",
     "banco",
     "pix",
-    "cpf"
+    "cpf",
   ];
 
   const sections = [
@@ -691,6 +694,7 @@ const FormPJ = () => {
                   onChange={handleChange}
                   placeholder="CNPJ da empresa"
                   className="w-full rounded border p-2"
+                  maxLength={18}
                 />
                 <button
                   type="button"
@@ -701,27 +705,141 @@ const FormPJ = () => {
                 </button>
               </div>
               {showCnpjList && (
-                <ul
-                  ref={cnpjListRef}
-                  className="absolute z-10 ml-[46%] mt-[-5rem] w-[40%] rounded-md border border-gray-300 bg-white shadow-lg"
-                >
-                  {cnpjList.length > 0 ? (
-                    cnpjList.map((cnpj, index) => (
-                      <li
-                        key={index}
-                        className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-                        onClick={() => handleCnpjSelect(cnpj)}
+                  <div className="animate-fadeIn absolute  left-[38%] mt-[5rem] z-50 w-64 max-w-md transform overflow-hidden rounded-2xl border border-gray-100/50 bg-white/90 p-0 shadow-2xl backdrop-blur-lg transition-all duration-300 ease-in-out hover:scale-[1.02] dark:border-gray-700/50 dark:bg-gray-800/95 md:w-72">
+                    {/* Cabeçalho */}
+                    <div className="dark:to-gray-750/90 flex items-center justify-between border-b border-gray-100/70 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 px-4 py-3 dark:border-gray-700/70 dark:from-gray-800/90">
+                      <h3 className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="mr-2 h-4 w-4 animate-pulse text-blue-500 dark:text-blue-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                          />
+                        </svg>
+                        <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400">
+                          <p className="text-[0.7rem]">
+                            PRESTADORES CADASTRADOS
+                          </p>
+                        </span>
+                      </h3>
+                      <button
+                        className="transform rounded-full p-1 text-gray-400 transition-colors duration-200 hover:rotate-90 hover:bg-gray-200/70 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-600/70 dark:hover:text-gray-200"
+                        onClick={() => setShowCnpjList(false)}
+                        aria-label="Fechar lista"
                       >
-                        {cnpj}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="px-4 py-2 text-gray-500">
-                      Nenhum CNPJ encontrado
-                    </li>
-                  )}
-                </ul>
-              )}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Conteúdo */}
+                    <div className="bg-gradient-to-b from-transparent to-blue-50/30 p-3 dark:to-blue-900/10">
+                      {cnpjList.length > 0 ? (
+                        <ul className="custom-scrollbar max-h-64 space-y-2 overflow-y-auto pr-1">
+                          {cnpjList.map((cnpj, index) => (
+                            <li
+                              key={index}
+                              className="transform transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03]"
+                              style={{
+                                animationDelay: `${index * 50}ms`,
+                                animation: "fadeInUp 0.5s ease-out forwards",
+                                opacity: 0,
+                              }}
+                            >
+                              <button
+                                onClick={() => handleCnpjSelect(cnpj)}
+                                className="group flex w-full items-center rounded-lg border border-gray-100/80 bg-white/80 px-4 py-3 text-left text-sm text-gray-700 shadow-sm backdrop-blur-sm transition-all duration-300 ease-in-out hover:border-blue-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50/70 hover:shadow-md dark:border-gray-600/80 dark:bg-gray-700/90 dark:text-gray-200 dark:hover:border-blue-700 dark:hover:bg-gray-600/90"
+                              >
+                                <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 transition-colors duration-300 group-hover:bg-blue-100 dark:bg-gray-600 dark:group-hover:bg-gray-500">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4 text-blue-500 transition-transform duration-300 group-hover:scale-110 group-hover:text-blue-600 dark:text-blue-400 dark:group-hover:text-blue-300"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                </span>
+                                <span className="truncate font-medium transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-300">
+                                  {cnpj}
+                                </span>
+                                <span className="ml-auto transform text-blue-500 opacity-0 transition-all duration-300 group-hover:opacity-100 dark:text-blue-400">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 5l7 7-7 7"
+                                    />
+                                  </svg>
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="mb-3 h-12 w-12 text-gray-300 dark:text-gray-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                            />
+                          </svg>
+                          <p className="text-sm">Nenhum CNPJ disponível</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Rodapé (opcional) */}
+                    {cnpjList.length > 0 && (
+                      <div className="dark:to-gray-750/80 border-t border-gray-100/70 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 px-4 py-2 text-center text-xs text-gray-500 dark:border-gray-700/70 dark:from-gray-800/80 dark:text-gray-400">
+                        {cnpjList.length}{" "}
+                        {cnpjList.length === 1
+                          ? "CNPJ encontrado"
+                          : "CNPJs encontrados"}
+                      </div>
+                    )}
+                  </div>
+                )}
             </div>
           )}
 
@@ -750,43 +868,43 @@ const FormPJ = () => {
 
         {/* Campo upload File */}
         <div
-      className={`mt-8 flex flex-col space-y-10 rounded-2xl bg-white p-1 ${activeTab === 3 ? "" : "hidden"}`}
-    >
-      {/* Upload de Certificado Digital */}
-      <div className="flex flex-col space-y-8">
-        <label
-          htmlFor="fileUpload"
-          className="flex w-fit cursor-pointer items-center gap-2 rounded-lg bg-purple-600 px-8 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
+          className={`mt-8 flex flex-col space-y-10 rounded-2xl bg-white p-1 ${activeTab === 3 ? "" : "hidden"}`}
         >
-          <CloudArrowUpIcon className="h-5 w-5" />
-          <span>Upload Certificado Digital</span>
-        </label>
-        <input
-          type="file"
-          id="fileUpload"
-          onChange={handleFileChange}
-          className="block w-full cursor-pointer rounded-lg border border-gray-300 bg-gray-50 px-4 py-1 text-sm text-gray-900 shadow-sm transition file:mr-4 file:rounded-lg file:border-0 file:bg-purple-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-purple-700 hover:file:bg-purple-200 focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:focus:ring-purple-400"
-        />
-      </div>
+          {/* Upload de Certificado Digital */}
+          <div className="flex flex-col space-y-8">
+            <label
+              htmlFor="fileUpload"
+              className="flex w-fit cursor-pointer items-center gap-2 rounded-lg bg-purple-600 px-8 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
+            >
+              <CloudArrowUpIcon className="h-5 w-5" />
+              <span>Upload Certificado Digital</span>
+            </label>
+            <input
+              type="file"
+              id="fileUpload"
+              onChange={handleFileChange}
+              className="block w-full cursor-pointer rounded-lg border border-gray-300 bg-gray-50 px-4 py-1 text-sm text-gray-900 shadow-sm transition file:mr-4 file:rounded-lg file:border-0 file:bg-purple-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-purple-700 hover:file:bg-purple-200 focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:focus:ring-purple-400"
+            />
+          </div>
 
-      {/* Senha do Certificado Digital */}
-      <div className="flex flex-col space-y-8">
-        <label
-          htmlFor="password"
-          className="flex w-fit items-center gap-2 rounded-lg bg-purple-600 px-8 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
-        >
-          <LockClosedIcon className="h-5 w-5" />
-          <span>Senha Certificado Digital</span>
-        </label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={handlePasswordChange}
-          placeholder="Digite a senha do certificado"
-          className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-1 text-sm text-gray-900 shadow-sm focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:focus:ring-purple-400"
-        />
-      </div>
+          {/* Senha do Certificado Digital */}
+          <div className="flex flex-col space-y-8">
+            <label
+              htmlFor="password"
+              className="flex w-fit items-center gap-2 rounded-lg bg-purple-600 px-8 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
+            >
+              <LockClosedIcon className="h-5 w-5" />
+              <span>Senha Certificado Digital</span>
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={handlePasswordChange}
+              placeholder="Digite a senha do certificado"
+              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-1 text-sm text-gray-900 shadow-sm focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:focus:ring-purple-400"
+            />
+          </div>
 
           <button
             type="button"
@@ -978,9 +1096,9 @@ const FormPJ = () => {
                         ? formDataState.quadroSocietario[
                             formDataState.quadroSocietario.length - 1
                           ][field.name as keyof QuadroSocietario] || ""
-                        : (formDataState as Record<string, any>)[field.name] || ""
+                        : (formDataState as Record<string, any>)[field.name] ||
+                          ""
                     }
-                    
                     placeholder={field.placeholder}
                     onChange={handleChange}
                     className="w-full rounded-lg border-2 border-gray-300 px-5 py-3 text-gray-800 shadow-sm transition-all ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-blue-400"

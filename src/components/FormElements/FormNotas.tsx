@@ -406,15 +406,23 @@ const FormNotas = () => {
         throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
       }
 
-      console.log("Nota enviada com sucesso:", dadosNota);
+      console.log("Nota enviada:", dadosNota);
 
       if (formDataState.cnpjPrestador) {
         const cnpjSemBarras = formDataState.cnpjPrestador.replace(/[^\d]/g, "");
         localStorage.setItem("cnpj", cnpjSemBarras);
         console.log("CNPJ salvo no localStorage:", cnpjSemBarras);
       }
+
+       // Atualizar os dados em segundo plano
+       setTimeout(() => {
+        window.location.reload();
+      }, 500); // Pequeno delay para parecer mais fluido
+
+      
     } catch (error) {
       console.error("Erro ao enviar os dados:", error);
+      alert(error)
     }
   };
   // -----> ENDPOINT PARA EMITIR NOTA FISCAL UTILIZANDO A API DO NFE.IO (FIM) <----
@@ -1656,7 +1664,7 @@ Chave Pix: ${socio.pix}`;
           {servicoList.length > 0 && (
             <button 
               onClick={() => {/* adicionar função para selecionar todos */}}
-              className="text-xs font-medium text-purple-600 hover:text-purple-800"
+              className="hidden  text-xs font-medium text-purple-600 hover:text-purple-800"
             >
               Selecionar todos
             </button>

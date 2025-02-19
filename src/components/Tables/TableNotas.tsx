@@ -254,6 +254,9 @@ const TableNotas = () => {
         "Cabeçalhos da resposta:",
         Array.from(response.headers.entries()),
       );
+
+      buscarNotas();
+
     } catch (error) {
       console.error("Erro no download:", error);
       alert("Erro ao baixar a nota fiscal.");
@@ -280,6 +283,7 @@ const TableNotas = () => {
       if (response.ok) {
         alert("Nota fiscal deletada com sucesso!");
         setNotas((prevNotas) => prevNotas.filter((nota) => nota.id !== notaId));
+        buscarNotas();
       } else {
         alert(data.error || "Erro ao deletar nota fiscal.");
       }
